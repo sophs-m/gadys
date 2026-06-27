@@ -1,3 +1,4 @@
+
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -21,9 +22,9 @@ const estados = [
   { name: 'PR', page: 'Parana', image: require('../../assets/images/estados/pr.png') },
   { name: 'PE', page: 'Pernambuco', image: require('../../assets/images/estados/pe.png') },
   { name: 'PI', page: 'Piaui', image: require('../../assets/images/estados/pi.png') },
-  { name: 'RJ', page: 'RiodeJaneiro', image: require('../../assets/images/estados/rj.png') },
-  { name: 'RN', page: 'RioGrandedoNorte', image: require('../../assets/images/estados/rn.png') },
-  { name: 'RS', page: 'RioGrandedoSul', image: require('../../assets/images/estados/rs.png') },
+  { name: 'RJ', page: 'RioDeJaneiro', image: require('../../assets/images/estados/rj.png') },
+  { name: 'RN', page: 'RioGrandeDoNorte', image: require('../../assets/images/estados/rn.png') },
+  { name: 'RS', page: 'RioGrandeDoSul', image: require('../../assets/images/estados/rs.png') },
   { name: 'RO', page: 'Rondonia', image: require('../../assets/images/estados/ro.png') },
   { name: 'RR', page: 'Roraima', image: require('../../assets/images/estados/rr.png') },
   { name: 'SC', page: 'SantaCatarina', image: require('../../assets/images/estados/sc.png') },
@@ -56,7 +57,7 @@ export default function Lugares() {
       </ScrollView>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/inicio')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/(tabs)/inicio')}>
           <Ionicons name="home-outline" size={26} color="white" />
           <Text style={styles.navText}>Início</Text>
         </TouchableOpacity>
@@ -75,7 +76,7 @@ export default function Lugares() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.navLogoContainer} onPress={() => router.push('/inicio')}>
+      <TouchableOpacity style={styles.navLogoContainer} onPress={() => router.push('/(tabs)/inicio')}>
         <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
       </TouchableOpacity>
     </View>

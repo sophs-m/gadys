@@ -1,18 +1,19 @@
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
+import { SettingsProvider } from '../context/SettingsContext';
 
-const hidden = { tabBarButton: () => null };
-
-export default function AppLayout() {
+export default function RootLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}>
-      <Tabs.Screen name="index" options={hidden} />
-      <Tabs.Screen name="login" options={hidden} />
-      <Tabs.Screen name="registro" options={hidden} />
-      <Tabs.Screen name="inicio" options={hidden} />
-      <Tabs.Screen name="estados" options={hidden} />
-      <Tabs.Screen name="favoritos" options={hidden} />
-      <Tabs.Screen name="perfil" options={hidden} />
-      <Tabs.Screen name="Estados" options={hidden} />
-    </Tabs>
+    <SettingsProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="Estados" />
+        <Stack.Screen name="comidas" />
+        <Stack.Screen name="favoritos" />
+        <Stack.Screen name="perfil" />
+        <Stack.Screen name="lugares" />
+      </Stack>
+    </SettingsProvider>
   );
 }

@@ -1,11 +1,12 @@
-
+import AbasSwipe from '../../components/AbasSwipe';
+import LocalList from '../../components/LocalList';
 import { useRouter } from 'expo-router';
-import { useState, useRef } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
-const { width: screenWidth } = Dimensions.get('window');
-
-const headerImage = require('../../../assets/images/ba/pelourinho.png');
+const headerImage = require('../../../assets/images/estados/ba.png');
 const pelourinhoImage = require('../../../assets/images/ba/pelourinho.png');
 const elevadorLacerdaImage = require('../../../assets/images/ba/elevador.png');
 const carnavalImage = require('../../../assets/images/ba/carnaval.png');
@@ -27,13 +28,7 @@ const places: Place[] = [
         category: 'Evento',
         location: 'Salvador',
         description: 'A maior festa de rua do planeta, com trios elétricos, blocos afros e a energia contagiante do axé.',
-        modalDescription: `
-### Carnaval de Salvador
-#### Das Festas Coloniais ao Maior Carnaval de Rua do Mundo
-As origens do Carnaval de Salvador remontam ao século XIX, quando a população participava do entrudo, uma festa trazida pelos portugueses em que as pessoas brincavam nas ruas jogando água, farinha e outros materiais umas nas outras. Com o passar do tempo, a celebração incorporou elementos das culturas africanas presentes na Bahia, especialmente das tradições musicais e religiosas trazidas pelos povos escravizados.
-No início do século XX, surgiram os primeiros clubes carnavalescos, corsos e blocos organizados. A grande transformação ocorreu em 1950, quando Dodô e Osmar adaptaram equipamentos sonoros a um veículo, criando o primeiro trio elétrico. A novidade revolucionou o Carnaval brasileiro, levando a música para as ruas e aproximando artistas e público. Nas décadas seguintes, o crescimento do axé music consolidou Salvador como referência mundial em festividades populares.
-Hoje, o Carnaval de Salvador é uma das maiores expressões da cultura afro-brasileira, reunindo milhões de pessoas e movimentando a economia, o turismo e a produção cultural da Bahia.
-`,
+        modalDescription: `**Carnaval de Salvador**\n\n**Das Festas Coloniais ao Maior Carnaval de Rua do Mundo**\nAs origens do Carnaval de Salvador remontam ao século XIX, quando a população participava do entrudo, uma festa trazida pelos portugueses. Com o tempo, a celebração incorporou elementos das culturas africanas presentes na Bahia, especialmente das tradições musicais e religiosas trazidas pelos povos escravizados.\n\nNo início do século XX, surgiram os primeiros clubes carnavalescos, corsos e blocos organizados. A grande transformação ocorreu em 1950, quando Dodô e Osmar criaram o primeiro trio elétrico. Nas décadas seguintes, o crescimento do axé music consolidou Salvador como referência mundial em festividades populares.\n\nHoje, o Carnaval de Salvador é uma das maiores expressões da cultura afro-brasileira, reunindo milhões de pessoas e movimentando a economia, o turismo e a produção cultural da Bahia.`,
         image: carnavalImage,
         rating: 5
     },
@@ -42,14 +37,7 @@ Hoje, o Carnaval de Salvador é uma das maiores expressões da cultura afro-bras
         category: 'Monumento',
         location: 'Salvador',
         description: 'Centro histórico de Salvador, com suas ladeiras de paralelepípedos, casarões coloridos e igrejas barrocas.',
-        modalDescription: `
-### Pelourinho
-#### O Coração Histórico do Brasil Colonial
-Fundado no século XVI, o Pelourinho foi o centro político, econômico e religioso da primeira capital do Brasil, Salvador. Durante o período colonial, a região concentrava prédios administrativos, residências de famílias influentes, igrejas e centros comerciais ligados ao comércio atlântico.
-O nome "Pelourinho" vem da estrutura de pedra instalada na praça principal para a aplicação pública de punições, especialmente contra pessoas escravizadas. Por esse motivo, o local guarda uma importante memória das desigualdades e da violência presentes durante o período escravista.
-Ao longo dos séculos, o bairro tornou-se um dos principais centros da cultura afro-brasileira. Após períodos de decadência e abandono no século XX, passou por um amplo processo de restauração na década de 1990. Atualmente, suas ruas preservam casarões dos séculos XVII e XVIII, igrejas barrocas e espaços culturais que contam a história da formação social e cultural do Brasil.
-O Pelourinho é reconhecido internacionalmente por representar a mistura de influências europeias, africanas e indígenas que ajudaram a construir a identidade brasileira.
-`,
+        modalDescription: `**Pelourinho**\n\n**O Coração Histórico do Brasil Colonial**\nFundado no século XVI, o Pelourinho foi o centro político, econômico e religioso da primeira capital do Brasil, Salvador. Durante o período colonial, a região concentrava prédios administrativos, residências de famílias influentes, igrejas e centros comerciais.\n\nO nome "Pelourinho" vem da estrutura de pedra instalada na praça principal para a aplicação pública de punições, especialmente contra pessoas escravizadas. Por esse motivo, o local guarda uma importante memória das desigualdades do período escravista.\n\nAo longo dos séculos, o bairro tornou-se um dos principais centros da cultura afro-brasileira. Após restauração na década de 1990, suas ruas preservam casarões dos séculos XVII e XVIII e igrejas barrocas que contam a história da formação social e cultural do Brasil.`,
         image: pelourinhoImage,
         rating: 5
     },
@@ -58,13 +46,7 @@ O Pelourinho é reconhecido internacionalmente por representar a mistura de infl
         category: 'Monumento',
         location: 'Salvador',
         description: 'Um dos cartões-postais da Bahia, ligando a Cidade Alta à Cidade Baixa, com uma vista deslumbrante da Baía de Todos-os-Santos.',
-        modalDescription: `
-### Elevador Lacerda
-#### Uma Solução para o Crescimento de Salvador
-Desde os tempos coloniais, Salvador era dividida entre a Cidade Alta e a Cidade Baixa. A Cidade Alta concentrava os centros administrativos, religiosos e residenciais, enquanto a Cidade Baixa abrigava o porto e as atividades comerciais. A diferença de aproximadamente 70 metros de altitude entre essas áreas dificultava o transporte de pessoas e mercadorias.
-Para resolver esse problema, o engenheiro e empresário baiano Antônio de Lacerda idealizou uma estrutura capaz de conectar os dois níveis da cidade. Inaugurado em 1873, o Elevador Lacerda tornou-se um marco da engenharia brasileira e uma demonstração do processo de modernização urbana vivido por Salvador no século XIX.
-Além de facilitar o cotidiano da população, o elevador fortaleceu o comércio entre as duas partes da cidade e contribuiu para o crescimento econômico da capital baiana. Reformado diversas vezes ao longo de sua história, continua sendo um dos principais símbolos urbanos do Brasil e um dos monumentos mais fotografados de Salvador.
-`,
+        modalDescription: `**Elevador Lacerda**\n\n**Uma Solução para o Crescimento de Salvador**\nDesde os tempos coloniais, Salvador era dividida entre a Cidade Alta e a Cidade Baixa. A diferença de aproximadamente 70 metros de altitude entre essas áreas dificultava o transporte de pessoas e mercadorias.\n\nPara resolver esse problema, o engenheiro Antônio de Lacerda idealizou uma estrutura capaz de conectar os dois níveis da cidade. Inaugurado em 1873, o Elevador Lacerda tornou-se um marco da engenharia brasileira e um símbolo da modernização urbana de Salvador no século XIX.\n\nReformado diversas vezes ao longo de sua história, continua sendo um dos principais símbolos urbanos do Brasil e um dos monumentos mais fotografados de Salvador.`,
         image: elevadorLacerdaImage,
         rating: 5
     },
@@ -73,95 +55,94 @@ Além de facilitar o cotidiano da população, o elevador fortaleceu o comércio
         category: 'Outro',
         location: 'Bahia',
         description: 'Arte marcial afro-brasileira que mistura luta, dança e música. Patrimônio cultural imaterial da UNESCO.',
-        modalDescription: `
-### Capoeira
-#### A Luta que se Tornou Patrimônio Cultural
-A história da Capoeira está diretamente ligada à resistência dos africanos escravizados no Brasil. Entre os séculos XVI e XIX, milhões de africanos foram trazidos à força para trabalhar nas colônias portuguesas. Em meio às condições de opressão, eles preservaram tradições culturais e desenvolveram formas de resistência física e simbólica.
-A Capoeira surgiu da combinação de movimentos corporais, ritmos musicais e conhecimentos de combate trazidos de diferentes regiões africanas. Para evitar a repressão dos senhores de engenho e das autoridades, seus praticantes frequentemente apresentavam os movimentos como dança ou manifestação cultural.
-Após a abolição da escravidão, em 1888, a prática continuou sendo perseguida por muitos anos e chegou a ser criminalizada. Somente no século XX, mestres como Mestre Bimba e Mestre Pastinha contribuíram para sua valorização e reconhecimento como patrimônio cultural brasileiro.
-Atualmente, a Capoeira é praticada em dezenas de países e representa um dos maiores símbolos da herança africana no Brasil. Sua influência ultrapassa o esporte e a dança, estando presente na música, na educação, na preservação da memória histórica e na valorização da cultura afro-brasileira.
-`,
+        modalDescription: `**Capoeira**\n\n**A Luta que se Tornou Patrimônio Cultural**\nA história da Capoeira está diretamente ligada à resistência dos africanos escravizados no Brasil. Em meio às condições de opressão, eles preservaram tradições culturais e desenvolveram formas de resistência física e simbólica.\n\nA Capoeira surgiu da combinação de movimentos corporais, ritmos musicais e conhecimentos de combate trazidos de diferentes regiões africanas. Para evitar a repressão, seus praticantes frequentemente apresentavam os movimentos como dança ou manifestação cultural.\n\nApós a abolição da escravidão, em 1888, a prática continuou sendo perseguida por anos. Somente no século XX, mestres como Mestre Bimba e Mestre Pastinha contribuíram para sua valorização. Atualmente, a Capoeira é praticada em dezenas de países e representa um dos maiores símbolos da herança africana no Brasil.`,
         image: capoeira,
         rating: 5
     }
 ];
 
-const CarouselCard = ({ item }: { item: Place }) => (
-    <View style={styles.carouselCard}>
-      <Image source={item.image} style={styles.carouselCardImage} />
-      <View style={styles.carouselCardContent}>
-        <Text style={styles.carouselCardTitle}>{item.name}</Text>
-        <Text style={styles.carouselCardDescription} numberOfLines={3}>{item.description}</Text>
+const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
+  <TouchableOpacity onPress={() => onPress(place)}>
+    <View style={styles.card}>
+      <Image source={place.image} style={styles.cardImage} />
+      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
+        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
+      </TouchableOpacity>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{place.name}</Text>
+        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
+        <Text style={styles.cardDescription}>{place.description}</Text>
       </View>
     </View>
-  );
+  </TouchableOpacity>
+);
+
+const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
+  if (!place) return null;
 
   const renderDescription = (description: string) => {
-    const sections = description.split('###').filter(s => s.trim());
-    return sections.map((section, index) => {
-        const parts = section.split('####');
-        const mainTitle = parts[0].trim();
-        return (
-            <View key={index}>
-                <Text style={styles.modalSubtitle}>{mainTitle}</Text>
-                {parts.slice(1).map((subSection, subIndex) => {
-                    const subParts = subSection.split('\n');
-                    const subTitle = subParts[0].trim();
-                    const content = subParts.slice(1).join('\n').trim();
-                    return (
-                        <View key={subIndex}>
-                            <Text style={styles.modalSubSubtitle}>{subTitle}</Text>
-                            <Text style={styles.modalDescription}>{content}</Text>
-                        </View>
-                    )
-                })}
-            </View>
-        )
-    })
+    const parts = (description || '').split('**');
+    return (
+      <Text style={styles.modalDescription}>
+        {parts.map((part, index) => {
+          if (index % 2 === 1) {
+            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
+          }
+          return part;
+        })}
+      </Text>
+    );
   };
 
+  return (
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Image source={place.image} style={styles.modalImage} />
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+            <Text style={styles.modalCloseBtnText}>✕</Text>
+          </TouchableOpacity>
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.modalTitleRow}>
+              <Text style={styles.modalTitle}>{place.name}</Text>
+              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
+                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
+            {renderDescription(place.modalDescription || place.description)}
+          </ScrollView>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function Bahia() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('Cultura Local');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef<FlatList<Place>>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
 
-  const onScroll = (event: any) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / (screenWidth - 40));
-    setActiveIndex(index);
+  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
+
+  const handlePontoFavorito = (nome: string) => {
+    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
   };
 
-  const renderCulturaLocal = () => (
-    <>
-      <FlatList
-        ref={flatListRef}
-        data={places}
-        renderItem={({ item }) => (
-            <CarouselCard item={item} />
-        )}
-        keyExtractor={item => item.name}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        style={{ width: screenWidth }}
-        snapToInterval={screenWidth-40}
-        decelerationRate="fast"
-        contentContainerStyle={{paddingHorizontal: 20}}
-      />
-      <View style={styles.pagination}>
-        {places.map((_, i) => (
-          <Text key={i} style={i === activeIndex ? styles.paginationActiveText : styles.paginationText}>
-            •
-          </Text>
-        ))}
-      </View>
-      <ScrollView style={styles.descriptionContainer}>
-        {renderDescription(places[activeIndex].modalDescription || places[activeIndex].description)}
-      </ScrollView>
-    </>
-  );
+  const openModal = useCallback((place: Place) => {
+    setSelectedPlace(place);
+    setModalVisible(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+    setSelectedPlace(null);
+  }, []);
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -173,104 +154,74 @@ export default function Bahia() {
           <Image source={headerImage} style={styles.headerImage} />
         </View>
 
-        <View style={styles.tabs}>
-          <TouchableOpacity onPress={() => setActiveTab('Historia')} style={[styles.tabButton, activeTab === 'Historia' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Historia' && styles.activeTabText]}>História</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('Cultura Local')} style={[styles.tabButton, activeTab === 'Cultura Local' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Cultura Local' && styles.activeTabText]}>Cultura Local</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.content}>
-          {activeTab === 'Historia' ? (
-            <View style={styles.historyContainer}>
-              <Text style={styles.historyTitle}>O Tabuleiro Geopolítico do Império Colonial</Text>
-              <Text style={styles.historyText}>A Bahia não é apenas onde o Brasil começou; ela foi o centro gravitacional econômico, cultural e político da América Portuguesa por mais de dois séculos.</Text>
-              <Text style={styles.historySubtitle}>A Economia do Açúcar e o Tráfico Negreiro</Text>
-              <Text style={styles.historyText}>Após a fundação de Salvador por Tomé de Sousa em 1549, a Bahia consolidou-se como a cabeça do império colonial. A região do Recôncavo Baiano desenvolveu uma economia açucareira de altíssima rentabilidade, transformando Salvador no principal porto de desembarque de africanos escravizados no Atlântico Sul.</Text>
-              <Text style={styles.historyText}>Em 1624, os holandeses ocuparam a cidade, sendo expulsos no ano seguinte pela Jornada dos Vassalos. Mesmo após a transferência da capital para o Rio de Janeiro em 1763, a Bahia manteve uma influência cultural e mercantil incomensurável.</Text>
-              <Text style={styles.historySubtitle}>Revoltas Sociais e a Guerra de Independência</Text>
-              <Text style={styles.historyText}>Em 1798, estourou a Conjuração Baiana (Revolta dos Alfaiates), movimento influenciado pela Revolução Francesa que pregava a independência e o fim da escravidão.</Text>
-              <Text style={styles.historyText}>Quando Dom Pedro I declarou a independência em 1822, as tropas portuguesas recusaram-se a aceitar e ocuparam Salvador. A expulsão definitiva dos portugueses ocorreu em 2 de julho de 1823, data máxima do calendário político baiano.</Text>
+        <AbasSwipe
+          cor={"#2196f3"}
+          historia={
+            <View style={styles.content}>
+              <View style={styles.historyContainer}>
+                <Text style={styles.historyTitle}>O Berço do Brasil e a Formação da Identidade Nacional</Text>
+              <Text style={styles.historySubtitle}>Os Primeiros Povos e a Chegada dos Portugueses</Text>
+              <Text style={styles.historyText}>O território da Bahia era habitado por diversos povos indígenas, especialmente Tupinambás. Em 22 de abril de 1500, a frota de Pedro Álvares Cabral chegou ao litoral baiano, iniciando oficialmente a colonização portuguesa na América.</Text>
+              <Text style={styles.historySubtitle}>A Fundação de Salvador</Text>
+              <Text style={styles.historyText}>Em 1549, Salvador foi fundada por Tomé de Sousa e tornou-se a primeira capital do Brasil, o principal centro político, administrativo e religioso da colônia durante mais de dois séculos.</Text>
+              <Text style={styles.historySubtitle}>O Ciclo do Açúcar e a Influência Africana</Text>
+              <Text style={styles.historyText}>Grandes engenhos foram instalados no Recôncavo Baiano. Salvador transformou-se em um dos maiores portos de entrada de pessoas escravizadas das Américas. Foi na Bahia que se consolidaram o Candomblé, a Capoeira, o Samba de Roda e diversas festas populares.</Text>
+              <Text style={styles.historySubtitle}>A Independência da Bahia</Text>
+              <Text style={styles.historyText}>Embora a Independência tenha sido proclamada em 1822, tropas portuguesas resistiram na Bahia até 2 de julho de 1823. Por isso, o 2 de Julho é considerado pelos baianos a verdadeira consolidação da independência brasileira.</Text>
+              <Text style={styles.historySubtitle}>Modernização e Patrimônio Histórico</Text>
+              <Text style={styles.historyText}>A descoberta de petróleo no Recôncavo Baiano na década de 1930 marcou nova fase de crescimento. O Pelourinho, com casarões coloniais e igrejas barrocas, foi reconhecido como Patrimônio Mundial pela UNESCO.</Text>
+              </View>
             </View>
-          ) : (
-            renderCulturaLocal()
-          )}
-        </View>
+          }
+          culturaLocal={
+            <View style={styles.content}>
+              <LocalList sigla="BA" imagensLocais={{}} />
+            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+            </View>
+          }
+        />
       </ScrollView>
+      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#e3f2fd' },
-    header: { height: 250 },
-    headerImage: { width: '100%', height: '100%' },
-    backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
-    backButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-    tabs: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 15, backgroundColor: '#e3f2fd' },
-    tabButton: { paddingVertical: 8, paddingHorizontal: 25, borderRadius: 20 },
-    activeTab: { backgroundColor: '#2196f3' },
-    tabText: { color: '#2196f3', fontWeight: 'bold', fontSize: 16 },
-    activeTabText: { color: '#fff' },
-    content: { paddingVertical: 20, alignItems: 'center', width: '100%'},
-    historyContainer: { backgroundColor: '#fff', borderRadius: 15, padding: 20, marginHorizontal: 20 },
-    historyTitle: { fontSize: 22, fontWeight: 'bold', color: '#2196f3', marginBottom: 15, textAlign: 'center' },
-    historySubtitle: { fontSize: 18, fontWeight: 'bold', color: '#2196f3', marginTop: 15, marginBottom: 5 },
-    historyText: { fontSize: 16, color: '#333', lineHeight: 24, marginBottom: 10 },
-    carouselCard: {
-      backgroundColor: '#fff',
-      borderRadius: 15,
-      marginBottom: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 5,
-      elevation: 3,
-      width: screenWidth - 80,
-      marginHorizontal: 10
-    },
-    carouselCardImage: {
-      width: '100%',
-      height: 180,
-      borderTopLeftRadius: 15,
-      borderTopRightRadius: 15,
-    },
-    carouselCardContent: {
-      padding: 15,
-    },
-    carouselCardTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: '#2196f3',
-    },
-    carouselCardDescription: {
-      fontSize: 16,
-      color: '#333',
-      marginTop: 5,
-    },
-    pagination: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    paginationText: {
-      fontSize: 30,
-      color: '#888',
-      marginHorizontal: 2,
-    },
-    paginationActiveText: {
-      fontSize: 30,
-      color: '#2196f3',
-      marginHorizontal: 2,
-    },
-    descriptionContainer: {
-      paddingHorizontal: 20,
-      maxHeight: 300
-    },
-    modalSubtitle: { fontSize: 20, fontWeight: 'bold', color: '#2196f3', marginTop: 15, marginBottom: 5 },
-    modalSubSubtitle: { fontSize: 18, fontWeight: 'bold', color: '#2196f3', marginTop: 10, marginBottom: 5 },
-    modalDescription: { fontSize: 16, color: '#333', lineHeight: 24 },
-  });
+  container: { flex: 1, backgroundColor: '#0A172A' },
+  header: { height: 250, position: 'relative' },
+  headerImage: { width: '100%', height: '100%' },
+  backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  backButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  tabs: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 15, backgroundColor: '#e3f2fd' },
+  tabButton: { paddingVertical: 8, paddingHorizontal: 25, borderRadius: 20 },
+  activeTab: { backgroundColor: '#2196f3' },
+  tabText: { color: '#2196f3', fontWeight: 'bold', fontSize: 16 },
+  activeTabText: { color: '#fff' },
+  content: { padding: 20 },
+  historyContainer: { backgroundColor: '#1E2F4A', borderRadius: 15, padding: 20 },
+  historyTitle: { fontSize: 22, fontWeight: 'bold', color: '#FFC700', marginBottom: 15, textAlign: 'center' },
+  historySubtitle: { fontSize: 18, fontWeight: 'bold', color: '#FFC700', marginTop: 10, marginBottom: 5 },
+  historyText: { fontSize: 16, color: '#ccc', lineHeight: 24, marginBottom: 10 },
+  categoryHeader: { fontSize: 20, fontWeight: 'bold', color: '#FFC700', marginTop: 15, marginBottom: 5 },
+  separator: { height: 1, backgroundColor: '#e0e0e0', marginVertical: 10, marginBottom: 15 },
+  card: { backgroundColor: '#2A3F5F', borderRadius: 15, marginBottom: 20, elevation: 3 },
+  cardHeart: { position: 'absolute', top: 10, right: 10, zIndex: 1, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: 5 },
+  cardImage: { width: '100%', height: 150, borderTopLeftRadius: 15, borderTopRightRadius: 15 },
+  cardContent: { padding: 15 },
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFC700' },
+  cardCategory: { fontSize: 14, color: '#aaa', marginVertical: 5 },
+  cardDescription: { fontSize: 14, color: '#ccc' },
+  modalContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+  modalContent: { backgroundColor: '#1E2F4A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+  modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalCloseBtn: { position: 'absolute', top: 14, right: 14, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, width: 30, height: 30, justifyContent: 'center', alignItems: 'center' },
+  modalCloseBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  modalBody: { padding: 20 },
+  modalTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 16, marginBottom: 5 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', flex: 1, marginRight: 10 },
+  modalCategory: { fontSize: 14, color: '#aaa', marginBottom: 10, paddingHorizontal: 20 },
+  modalDescription: { fontSize: 15, color: '#ddd', lineHeight: 23 },
+  modalSubtitle: { fontWeight: 'bold', color: '#FFC700' },
+  closeButton: { backgroundColor: '#FFC700', margin: 20, marginTop: 0, borderRadius: 25, paddingVertical: 13, alignItems: 'center' },
+  closeButtonText: { color: '#0A172A', fontWeight: 'bold', fontSize: 15 },
+});

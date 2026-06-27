@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { version } from 'expo/package.json';
 import { Image } from 'expo-image';
 import { useColorScheme, StyleSheet } from 'react-native';

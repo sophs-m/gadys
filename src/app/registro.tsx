@@ -1,134 +1,119 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-  Image, ImageBackground, Keyboard, KeyboardAvoidingView, Platform,
-  SafeAreaView, ScrollView, StyleSheet, Text, TextInput,
-  TouchableOpacity, TouchableWithoutFeedback, View,
-} from "react-native";
+  Alert, Image, ImageBackground, StyleSheet, Text,
+  TextInput, TouchableOpacity, View,
+} from 'react-native';
+import { cadastrar } from '../services/auth';
 
-export default function RegisterScreen() {
+export default function Registro() {
   const router = useRouter();
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleCadastro = async () => {
+    if (!nome || !email || !senha) { Alert.alert('Preencha todos os campos'); return; }
+    setLoading(true);
+    try {
+      await cadastrar(nome, email, senha);
+      router.replace('/(tabs)/inicio');
+    } catch (e: any) {
+      Alert.alert('Erro', e.message ?? 'Não foi possível criar a conta');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground
-      source={require("../../assets/images/fundos/inicializacao.png")}
-      style={styles.background}
+      source={require('../../assets/images/fundos/inicializacao.png')}
+      style={styles.bg}
+      resizeMode="cover"
     >
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <SafeAreaView style={styles.safeArea}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-              <View style={styles.header}>
-                <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
-                <Text style={styles.title}>Cadastre-se</Text>
-                <Text style={styles.subtitle}>Crie sua conta e comece a explorar o Brasil com o GADYS.</Text>
-              </View>
+      <View style={styles.overlay}>
+        <View style={styles.logoArea}>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.welcome}>Criar Conta</Text>
+          <Text style={styles.subtitle}>Junte-se e explore as histórias do Brasil.</Text>
+        </View>
 
-              <View style={styles.inputContainer}>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={24} color="#888" style={styles.inputIcon} />
-                  <TextInput placeholder="Nome completo" placeholderTextColor="#888" style={styles.input} autoCapitalize="words" />
-                </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={24} color="#888" style={styles.inputIcon} />
-                  <TextInput placeholder="E-mail" placeholderTextColor="#888" style={styles.input} keyboardType="email-address" autoCapitalize="none" />
-                </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={24} color="#888" style={styles.inputIcon} />
-                  <TextInput placeholder="Senha" placeholderTextColor="#888" style={styles.input} secureTextEntry={secureTextEntry} />
-                  <TouchableOpacity onPress={() => setSecureTextEntry(!secureTextEntry)}>
-                    <Ionicons name={secureTextEntry ? "eye-off-outline" : "eye-outline"} size={24} color="#888" style={styles.inputIconRight} />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={24} color="#888" style={styles.inputIcon} />
-                  <TextInput placeholder="Confirmar senha" placeholderTextColor="#888" style={styles.input} secureTextEntry={confirmSecureTextEntry} />
-                  <TouchableOpacity onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}>
-                    <Ionicons name={confirmSecureTextEntry ? "eye-off-outline" : "eye-outline"} size={24} color="#888" style={styles.inputIconRight} />
-                  </TouchableOpacity>
-                </View>
-              </View>
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome completo"
+            placeholderTextColor="#aaa"
+            value={nome}
+            onChangeText={setNome}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor="#aaa"
+            secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
+          />
 
-              <View style={styles.dobContainer}>
-                <Text style={styles.dobLabel}>Data de nascimento</Text>
-                <View style={styles.dobInputWrapper}>
-                  <TextInput placeholder="DD" placeholderTextColor="#888" style={[styles.dobInput, styles.dayInput]} keyboardType="number-pad" maxLength={2} />
-                  <TextInput placeholder="MM" placeholderTextColor="#888" style={[styles.dobInput, styles.monthInput]} keyboardType="number-pad" maxLength={2} />
-                  <TextInput placeholder="AAAA" placeholderTextColor="#888" style={[styles.dobInput, styles.yearInput]} keyboardType="number-pad" maxLength={4} />
-                </View>
-              </View>
+          <TouchableOpacity style={styles.btn} onPress={handleCadastro} disabled={loading}>
+            <Text style={styles.btnText}>{loading ? 'Criando...' : 'Criar Conta'}</Text>
+          </TouchableOpacity>
 
-              <TouchableOpacity style={styles.createAccountButton} onPress={() => router.push("/inicio")}>
-                <Text style={styles.createAccountButtonText}>Criar conta</Text>
-              </TouchableOpacity>
-
-              <View style={styles.separatorContainer}>
-                <View style={styles.line} />
-                <Text style={styles.separatorText}>ou cadastre-se com</Text>
-                <View style={styles.line} />
-              </View>
-
-              <View style={styles.socialLoginContainer}>
-                <TouchableOpacity style={styles.socialButton}>
-                  <Ionicons name="logo-google" size={30} color="#DB4437" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton}>
-                  <Ionicons name="logo-facebook" size={30} color="#4267B2" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.socialButton}>
-                  <Ionicons name="logo-apple" size={30} color="#000" />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.loginContainer}>
-                <Text style={styles.loginText}>Já tem uma conta? </Text>
-                <TouchableOpacity onPress={() => router.push("/login")}>
-                  <Text style={styles.loginLink}>Entrar</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          <View style={styles.loginRow}>
+            <Text style={styles.loginText}>Já tem conta? </Text>
+            <TouchableOpacity onPress={() => router.replace('/login')}>
+              <Text style={styles.loginLink}>Entrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  container: { flex: 1 },
-  safeArea: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(10, 23, 42, 0.5)" },
-  scrollContainer: { flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 30, paddingVertical: 20 },
-  header: { alignItems: "center", marginBottom: 30 },
-  logo: { width: 100, height: 100, resizeMode: "contain", marginBottom: 10 },
-  title: { fontSize: 32, fontWeight: "bold", color: "white", marginBottom: 10 },
-  subtitle: { fontSize: 16, color: "white", textAlign: "center" },
-  inputContainer: { width: "100%" },
-  inputWrapper: {
-    flexDirection: "row", alignItems: "center", backgroundColor: "white",
-    borderRadius: 12, paddingHorizontal: 15, marginBottom: 15, height: 55,
+  bg: { flex: 1 },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(7,23,47,0.35)',
+    paddingHorizontal: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  inputIcon: { marginRight: 10 },
-  inputIconRight: { marginLeft: 10 },
-  input: { flex: 1, fontSize: 16, color: "#333" },
-  dobContainer: { width: "100%", marginBottom: 20 },
-  dobLabel: { color: "white", marginBottom: 10, fontSize: 14 },
-  dobInputWrapper: { flexDirection: "row", justifyContent: "space-between" },
-  dobInput: { backgroundColor: "white", borderRadius: 12, paddingHorizontal: 15, height: 55, fontSize: 16, color: "#333", textAlign: "center" },
-  dayInput: { width: "22%" },
-  monthInput: { width: "22%" },
-  yearInput: { width: "48%" },
-  createAccountButton: { backgroundColor: "#0052CC", paddingVertical: 15, borderRadius: 12, alignItems: "center", width: "100%", marginBottom: 20 },
-  createAccountButtonText: { color: "white", fontSize: 18, fontWeight: "bold" },
-  separatorContainer: { flexDirection: "row", alignItems: "center", width: "100%", marginBottom: 20 },
-  line: { flex: 1, height: 1, backgroundColor: "rgba(255, 255, 255, 0.5)" },
-  separatorText: { color: "white", marginHorizontal: 10 },
-  socialLoginContainer: { flexDirection: "row", justifyContent: "space-evenly", width: "80%", marginBottom: 30 },
-  socialButton: { backgroundColor: "white", padding: 12, borderRadius: 10, width: 60, height: 60, justifyContent: "center", alignItems: "center" },
-  loginContainer: { flexDirection: "row", justifyContent: "center" },
-  loginText: { color: "white" },
-  loginLink: { color: "#00BFFF", fontWeight: "bold" },
+  logoArea: { alignItems: 'center', marginBottom: 32 },
+  logo: { width: 180, height: 90, marginBottom: 20 },
+  welcome: { fontSize: 34, fontWeight: 'bold', color: '#FFF', marginBottom: 8, textAlign: 'center' },
+  subtitle: { fontSize: 15, color: '#CCC', textAlign: 'center', lineHeight: 22 },
+  form: { width: '100%', gap: 12 },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    color: '#FFF',
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  btn: {
+    backgroundColor: '#FFC107',
+    borderRadius: 30,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  btnText: { color: '#07172F', fontWeight: 'bold', fontSize: 16 },
+  loginRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 4 },
+  loginText: { color: '#AAA', fontSize: 14 },
+  loginLink: { color: '#FFC107', fontSize: 14, fontWeight: 'bold' },
 });

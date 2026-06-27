@@ -1,14 +1,20 @@
-
+import AbasSwipe from '../../components/AbasSwipe';
+import LocalList from '../../components/LocalList';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState, useRef } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
-const { width: screenWidth } = Dimensions.get('window');
+const headerImage = require('../../../assets/images/estados/am.png');
+const teatroImage = require('../../../assets/images/am/teatro.png');
+const encontroImage = require('../../../assets/images/am/encontro.png');
+const festivalImage = require('../../../assets/images/am/festival.png');
+const tacacaImage = require('../../../assets/images/am/tacacat.jpg');
+const anavilhanasImage = require('../../../assets/images/am/anavilhanas.jpg');
+const bumbodromoImage = require('../../../assets/images/am/bumbodromo.jpg');
 
-const headerImage = require('../../../assets/images/am/teatro.png');
-const teatroAmazonasImage = require('../../../assets/images/am/teatro.png');
-const encontroDasAguasImage = require('../../../assets/images/am/encontro.png');
-const festivalDeParintinsImage = require('../../../assets/images/am/festival.png');
+const COR = '#FFC700';
 
 interface Place {
   name: string;
@@ -21,139 +27,91 @@ interface Place {
 }
 
 const places: Place[] = [
-    {
-        name: 'Festival Folclórico de Parintins',
-        category: 'Evento',
-        location: 'Parintins',
-        description: 'A maior ópera a céu aberto da América Latina, com a disputa entre os bois Garantido e Caprichoso.',
-        modalDescription: `
-### Festival Folclórico de Parintins
-#### Origem e Tradição Popular
-O Festival Folclórico de Parintins surgiu no município de Parintins, no Amazonas, a partir das tradicionais brincadeiras do Boi-Bumbá, uma manifestação cultural inspirada em lendas, costumes indígenas e influências africanas e europeias. Oficializado na década de 1960, o festival cresceu até se tornar um dos maiores espetáculos folclóricos do Brasil.
-#### A Disputa entre Garantido e Caprichoso
-O evento é marcado pela competição entre os bois-bumbás Garantido e Caprichoso, que apresentam grandiosas encenações com alegorias, músicas, danças e narrativas inspiradas na cultura amazônica. Realizado anualmente no Bumbódromo, o festival atrai milhares de turistas e promove a valorização das tradições, da arte e da identidade amazônica.
-#### Influência Cultural e Econômica
-Além de fortalecer o orgulho regional, o festival movimenta a economia local, gera empregos e projeta a cultura amazonense para o Brasil e o mundo, tornando-se um dos principais símbolos do estado do Amazonas.
-`,
-        image: festivalDeParintinsImage,
-        rating: 5
-    },
-    {
-        name: 'Teatro Amazonas',
-        category: 'Monumento',
-        location: 'Manaus',
-        description: 'Símbolo da riqueza do ciclo da borracha, uma das mais belas casas de ópera do mundo.',
-        modalDescription: `
-### Teatro Amazonas
-#### Símbolo do Ciclo da Borracha
-Inaugurado em 1896, o Teatro Amazonas foi construído durante o auge do Ciclo da Borracha, período em que Manaus viveu grande prosperidade econômica graças à exportação do látex. A riqueza gerada pela atividade permitiu a realização de obras grandiosas que transformaram a cidade em um importante centro urbano da Amazônia.
-#### Arquitetura e Importância Histórica
-Com influências da arquitetura europeia, o teatro destaca-se por sua cúpula colorida, decorada com as cores da bandeira brasileira, e por seus materiais importados de diversos países. O edifício tornou-se um dos maiores patrimônios históricos e culturais do Brasil.
-#### Influência Cultural
-Atualmente, o Teatro Amazonas é palco de concertos, óperas, festivais e apresentações artísticas, representando a riqueza cultural do estado e preservando a memória de um dos períodos mais marcantes da história amazonense.
-`,
-        image: teatroAmazonasImage,
-        rating: 5
-    },
-    {
-        name: 'Encontro das Águas',
-        category: 'Outro',
-        location: 'Manaus',
-        description: 'Fenômeno natural onde os rios Negro e Solimões correm lado a lado sem se misturar por quilômetros.',
-        modalDescription: `
-### Encontro das Águas
-#### Origem Natural e Importância Histórica
-O Encontro das Águas é um dos fenômenos naturais mais famosos da Amazônia, localizado próximo à cidade de Manaus. Nesse ponto, as águas escuras do Rio Negro encontram as águas barrentas do Rio Solimões, correndo lado a lado por cerca de 6 quilômetros sem se misturar imediatamente. Esse fenômeno ocorre devido às diferenças de temperatura, velocidade e densidade entre os dois rios.
-#### Presença dos Povos Indígenas
-Muito antes da chegada dos europeus, a região já era habitada por diversos povos indígenas, que utilizavam os rios como principais vias de transporte, comunicação e comércio. O encontro dos rios possuía importância estratégica, pois conectava diferentes comunidades da Amazônia e facilitava a circulação de pessoas e mercadorias.
-#### Período Colonial e Formação de Manaus
-Durante a colonização portuguesa, a área tornou-se um importante ponto de navegação e ocupação territorial. A localização privilegiada próxima ao Encontro das Águas contribuiu para o crescimento de Manaus, que mais tarde se transformaria em um dos principais centros urbanos da Amazônia. Os rios serviam como verdadeiras estradas naturais, fundamentais para a integração da região ao restante do país.
-#### Influência Econômica e Cultural
-Ao longo dos séculos, o Encontro das Águas esteve diretamente ligado ao desenvolvimento econômico do Amazonas. Durante o Ciclo da Borracha, entre os séculos XIX e XX, milhares de embarcações passaram pela região transportando látex e mercadorias. Além disso, o local inspirou lendas, manifestações culturais e tradições das populações ribeirinhas, tornando-se um símbolo da identidade amazônica.
-#### Patrimônio Natural da Amazônia
-Atualmente, o Encontro das Águas é reconhecido como um dos maiores patrimônios naturais do Brasil. Além de sua beleza cênica e relevância turística, ele representa a riqueza ambiental da Amazônia e a profunda relação entre os rios, a história e a cultura dos povos que vivem na região.
-`,
-        image: encontroDasAguasImage,
-        rating: 5
-    }
+  {
+    name: 'Festival Folclórico de Parintins',
+    category: 'Evento',
+    location: 'Parintins',
+    description: 'A maior festa folclórica da Amazônia, com a épica disputa entre os bois Garantido e Caprichoso no Bumbódromo.',
+    modalDescription: `**Festival Folclórico de Parintins**\n\n**A Maior Ópera a Céu Aberto da América Latina**\nRealizado todo ano no último fim de semana de junho, o Festival de Parintins é a maior manifestação cultural da Amazônia. A cidade de Parintins, ilha no meio do Rio Amazonas, recebe mais de 100 mil visitantes durante os três dias de festa.\n\n**Garantido x Caprichoso**\nA disputa entre o Boi Garantido (vermelho) e o Boi Caprichoso (azul) divide a cidade ao meio. Cada boi tem seus torcedores fanáticos, e a rivalidade permeia todos os aspectos da vida em Parintins.\n\n**O Bumbódromo**\nO espetáculo acontece no Bumbódromo, arena construída em formato de cabeça de boi com capacidade para 35 mil pessoas. Cada apresentação dura cerca de 3 horas e envolve mais de mil figurantes, alegorias monumentais, toadas e danças típicas.`,
+    image: festivalImage,
+    rating: 5,
+  },
+
 ];
 
-const CarouselCard = ({ item }: { item: Place }) => (
-    <View style={styles.carouselCard}>
-      <Image source={item.image} style={styles.carouselCardImage} />
-      <View style={styles.carouselCardContent}>
-        <Text style={styles.carouselCardTitle}>{item.name}</Text>
-        <Text style={styles.carouselCardDescription} numberOfLines={3}>{item.description}</Text>
+const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
+  <TouchableOpacity onPress={() => onPress(place)}>
+    <View style={styles.card}>
+      <Image source={place.image} style={styles.cardImage} />
+      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
+        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
+      </TouchableOpacity>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{place.name}</Text>
+        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
+        <Text style={styles.cardDescription}>{place.description}</Text>
       </View>
     </View>
-  );
+  </TouchableOpacity>
+);
 
+const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
+  if (!place) return null;
+
+  // amazonq-ignore-next-line
   const renderDescription = (description: string) => {
-    const sections = description.split('###').filter(s => s.trim());
-    return sections.map((section, index) => {
-        const parts = section.split('####');
-        const mainTitle = parts[0].trim();
-        return (
-            <View key={index}>
-                <Text style={styles.modalSubtitle}>{mainTitle}</Text>
-                {parts.slice(1).map((subSection, subIndex) => {
-                    const subParts = subSection.split('\n');
-                    const subTitle = subParts[0].trim();
-                    const content = subParts.slice(1).join('\n').trim();
-                    return (
-                        <View key={subIndex}>
-                            <Text style={styles.modalSubSubtitle}>{subTitle}</Text>
-                            <Text style={styles.modalDescription}>{content}</Text>
-                        </View>
-                    )
-                })}
-            </View>
-        )
-    })
+    const parts = (description || '').split('**');
+    return (
+      <Text style={styles.modalDescription}>
+        {parts.map((part, index) => {
+          if (index % 2 === 1) return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
+          return part;
+        })}
+      </Text>
+    );
   };
 
+  return (
+    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Image source={place.image} style={styles.modalImage} />
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+            <Text style={styles.modalCloseBtnText}>✕</Text>
+          </TouchableOpacity>
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.modalTitleRow}>
+              <Text style={styles.modalTitle}>{place.name}</Text>
+              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
+                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
+            {renderDescription(place.modalDescription || place.description)}
+          </ScrollView>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function Amazonas() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('Cultura Local');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef<FlatList<Place>>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
 
-  const onScroll = (event: any) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / (screenWidth - 40));
-    setActiveIndex(index);
+  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
+
+  const handlePontoFavorito = (nome: string) => {
+    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
   };
 
-  const renderCulturaLocal = () => (
-    <>
-      <FlatList
-        ref={flatListRef}
-        data={places}
-        renderItem={({ item }) => (
-            <CarouselCard item={item} />
-        )}
-        keyExtractor={item => item.name}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        style={{ width: screenWidth }}
-        snapToInterval={screenWidth-40}
-        decelerationRate="fast"
-        contentContainerStyle={{paddingHorizontal: 20}}
-      />
-      <View style={styles.pagination}>
-        {places.map((_, i) => (
-          <Text key={i} style={i === activeIndex ? styles.paginationActiveText : styles.paginationText}>
-            •
-          </Text>
-        ))}
-      </View>
-      <ScrollView style={styles.descriptionContainer}>
-        {renderDescription(places[activeIndex].modalDescription || places[activeIndex].description)}
-      </ScrollView>
-    </>
-  );
+  const openModal = useCallback((place: Place) => { setSelectedPlace(place); setModalVisible(true); }, []);
+  const closeModal = useCallback(() => { setModalVisible(false); setSelectedPlace(null); }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -164,104 +122,71 @@ export default function Amazonas() {
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
-
-        <View style={styles.tabs}>
-          <TouchableOpacity onPress={() => setActiveTab('Historia')} style={[styles.tabButton, activeTab === 'Historia' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Historia' && styles.activeTabText]}>História</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('Cultura Local')} style={[styles.tabButton, activeTab === 'Cultura Local' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Cultura Local' && styles.activeTabText]}>Cultura Local</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.content}>
-          {activeTab === 'Historia' ? (
-            <View style={styles.historyContainer}>
-              <Text style={styles.historyTitle}>O Gigante da Floresta, as Missões e a Borracha</Text>
-              <Text style={styles.historyText}>Ocupando o coração da maior floresta tropical do planeta, o Amazonas teve uma colonização tardia, baseada na navegação fluvial e no extrativismo.</Text>
-              <Text style={styles.historySubtitle}>As Missões Religiosas e as Drogas do Sertão</Text>
-              <Text style={styles.historyText}>A penetração portuguesa consolidou-se a partir de expedições militares, como a de Pedro Teixeira em 1637, e pela forte atuação de ordens religiosas. A Fortaleza de São José do Rio Negro, fundada em 1669, daria origem à futura cidade de Manaus. Em 1850, a província do Amazonas se emancipou formalmente do Grão-Pará.</Text>
-              <Text style={styles.historySubtitle}>A Belle Époque Amazônica</Text>
-              <Text style={styles.historyText}>Entre 1880 e 1910, o Amazonas viveu o Ciclo da Borracha. Manaus enriqueceu de forma espantosa — a elite construiu uma cidade europeizada no meio da selva, com bondes elétricos e o monumental Teatro Amazonas (inaugurado em 1896).</Text>
-              <Text style={styles.historyText}>O ciclo ruiu após o britânico Henry Wickham contrabandear sementes de seringueira para Londres. Cultivada em plantation na Ásia, a borracha asiática inundou o mercado, mergulhando o Amazonas em uma longa estagnação só revertida com a Zona Franca de Manaus.</Text>
+        <AbasSwipe
+          cor={COR}
+          historia={
+            <View style={styles.content}>
+              <View style={styles.historyContainer}>
+                <Text style={styles.historyTitle}>O Coração da Amazônia e a História da Maior Floresta Tropical do Mundo</Text>
+                <Text style={styles.historySubtitle}>Os Primeiros Povos da Amazônia</Text>
+                <Text style={styles.historyText}>Povos como Tikuna, Yanomami, Baniwa, Sateré-Mawé e Tukano contribuíram para a diversidade cultural amazônica. Descobertas arqueológicas revelaram grandes comunidades organizadas com sistemas agrícolas avançados e profundo conhecimento ambiental.</Text>
+                <Text style={styles.historySubtitle}>A Conquista Portuguesa</Text>
+                <Text style={styles.historyText}>Em 1669 foi fundado o Forte de São José do Rio Negro, núcleo que deu origem à atual Manaus. Os rios tornaram-se verdadeiras estradas naturais para a ocupação do interior e a integração da região à colônia.</Text>
+                <Text style={styles.historySubtitle}>O Ciclo da Borracha</Text>
+                <Text style={styles.historyText}>No final do século XIX, a Amazônia tornou-se a principal fornecedora de látex do planeta. A riqueza transformou Manaus em uma das cidades mais modernas da América Latina, com o Teatro Amazonas inaugurado em 1896 como símbolo desse período.</Text>
+                <Text style={styles.historySubtitle}>A Crise da Borracha</Text>
+                <Text style={styles.historyText}>No início do século XX, sementes de seringueira levadas à Ásia permitiram plantações altamente produtivas, provocando o colapso da economia amazônica. O Amazonas enfrentou décadas de dificuldades econômicas.</Text>
+                <Text style={styles.historySubtitle}>A Zona Franca de Manaus</Text>
+                <Text style={styles.historyText}>Em 1967 foi criada a Zona Franca de Manaus, oferecendo incentivos fiscais para atrair indústrias. A iniciativa transformou Manaus em um dos principais polos industriais do Brasil, nos setores de eletrônicos, motocicletas e informática.</Text>
+              </View>
             </View>
-          ) : (
-            renderCulturaLocal()
-          )}
-        </View>
+          }
+          culturaLocal={
+            <View style={styles.content}>
+              <LocalList sigla="AM" imagensLocais={{
+                'Teatro Amazonas': teatroImage,
+                'Encontro das Águas': encontroImage,
+                'Festival Folclórico de Parintins': festivalImage,
+              }} />
+              {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+            </View>
+          }
+        />
       </ScrollView>
+      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e0f2f1' },
+  container: { flex: 1, backgroundColor: '#0A172A' },
   header: { height: 250 },
   headerImage: { width: '100%', height: '100%' },
   backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
   backButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  tabs: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 15, backgroundColor: '#e0f2f1' },
-  tabButton: { paddingVertical: 8, paddingHorizontal: 25, borderRadius: 20 },
-  activeTab: { backgroundColor: '#009688' },
-  tabText: { color: '#009688', fontWeight: 'bold', fontSize: 16 },
-  activeTabText: { color: '#fff' },
-  content: { paddingVertical: 20, alignItems: 'center', width: '100%'},
-  historyContainer: { backgroundColor: '#fff', borderRadius: 15, padding: 20, marginHorizontal: 20 },
-  historyTitle: { fontSize: 22, fontWeight: 'bold', color: '#009688', marginBottom: 15, textAlign: 'center' },
-  historySubtitle: { fontSize: 18, fontWeight: 'bold', color: '#009688', marginTop: 15, marginBottom: 5 },
-  historyText: { fontSize: 16, color: '#333', lineHeight: 24, marginBottom: 10 },
-  carouselCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    width: screenWidth - 80,
-    marginHorizontal: 10
-  },
-  carouselCardImage: {
-    width: '100%',
-    height: 180,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-  },
-  carouselCardContent: {
-    padding: 15,
-  },
-  carouselCardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#009688',
-  },
-  carouselCardDescription: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 5,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  paginationText: {
-    fontSize: 30,
-    color: '#888',
-    marginHorizontal: 2,
-  },
-  paginationActiveText: {
-    fontSize: 30,
-    color: '#009688',
-    marginHorizontal: 2,
-  },
-  descriptionContainer: {
-    paddingHorizontal: 20,
-    maxHeight: 300
-  },
-  modalSubtitle: { fontSize: 20, fontWeight: 'bold', color: '#009688', marginTop: 15, marginBottom: 5 },
-  modalSubSubtitle: { fontSize: 18, fontWeight: 'bold', color: '#009688', marginTop: 10, marginBottom: 5 },
-  modalDescription: { fontSize: 16, color: '#333', lineHeight: 24 },
+  content: { padding: 20 },
+  historyContainer: { backgroundColor: '#1E2F4A', borderRadius: 15, padding: 20 },
+  historyTitle: { fontSize: 22, fontWeight: 'bold', color: COR, marginBottom: 15, textAlign: 'center' },
+  historySubtitle: { fontSize: 18, fontWeight: 'bold', color: COR, marginTop: 10, marginBottom: 5 },
+  historyText: { fontSize: 16, color: '#ccc', lineHeight: 24, marginBottom: 10 },
+  card: { backgroundColor: '#2A3F5F', borderRadius: 15, marginBottom: 20, elevation: 3 },
+  cardHeart: { position: 'absolute', top: 10, right: 10, zIndex: 1, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: 5 },
+  cardImage: { width: '100%', height: 150, borderTopLeftRadius: 15, borderTopRightRadius: 15 },
+  cardContent: { padding: 15 },
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: COR },
+  cardCategory: { fontSize: 14, color: '#aaa', marginVertical: 5 },
+  cardDescription: { fontSize: 14, color: '#ccc' },
+  modalContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+  modalContent: { backgroundColor: '#1E2F4A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+  modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalCloseBtn: { position: 'absolute', top: 14, right: 14, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, width: 30, height: 30, justifyContent: 'center', alignItems: 'center' },
+  modalCloseBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  modalBody: { padding: 20 },
+  modalTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 5 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', flex: 1, marginRight: 10 },
+  modalCategory: { fontSize: 14, color: '#aaa', marginBottom: 10 },
+  modalDescription: { fontSize: 15, color: '#ddd', lineHeight: 23 },
+  modalSubtitle: { fontWeight: 'bold', color: '#FFC700' },
+  closeButton: { backgroundColor: '#FFC700', margin: 20, marginTop: 0, borderRadius: 25, paddingVertical: 13, alignItems: 'center' },
+  closeButtonText: { color: '#0A172A', fontWeight: 'bold', fontSize: 15 },
 });

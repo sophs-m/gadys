@@ -1,15 +1,15 @@
-
 import { useRouter } from 'expo-router';
-import { useCallback, useState, useRef } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
+import AbasSwipe from '../../components/AbasSwipe';
+import LocalList from '../../components/LocalList';
 
-const { width: screenWidth } = Dimensions.get('window');
-
-const headerImage = require('../../../assets/images/ac/banner.png');
+const headerImage = require('../../../assets/images/estados/ac.png');
 const seringueiraImage = require('../../../assets/images/ac/seringueira.png');
 const mercadoVelhoImage = require('../../../assets/images/ac/mercado.png');
 const festivalDePraiaImage = require('../../../assets/images/ac/festival.png');
-const culinariaAcreanaImage = require('../../../assets/images/ac/serra.png');
 
 interface Place {
   name: string;
@@ -27,15 +27,7 @@ const places: Place[] = [
     category: 'Evento',
     location: 'Rio Branco',
     description: 'No Acre, quando o nível dos rios baixa durante o "verão amazônico" (julho a setembro), bancos de areia surgem, dando lugar a festivais com shows, esportes e gastronomia regional.',
-    modalDescription: `
-### A Festa de Praia do Acre
-#### Origem e Desenvolvimento (Século XX)
-A Festa de Praia surgiu a partir do costume das comunidades acreanas de aproveitar as praias naturais que aparecem durante o período de estiagem dos rios amazônicos. Com a diminuição do nível das águas entre os meses de julho e setembro, extensas faixas de areia tornam-se espaços de lazer, convivência e celebração para a população local.
-#### Transformação em Evento Cultural
-Ao longo dos anos, esses encontros informais evoluíram para grandes festivais organizados por prefeituras e comunidades. As festas passaram a incluir shows musicais, apresentações culturais, competições esportivas, concursos de beleza, feiras de artesanato e barracas com comidas típicas, atraindo visitantes de diversas regiões.
-#### Valorização da Cultura Acreana
-Mais do que um evento recreativo, a Festa de Praia tornou-se uma importante manifestação cultural do Acre. Ela fortalece o turismo, movimenta a economia local e valoriza as tradições das populações ribeirinhas, destacando a importância dos rios para a história, a cultura e a identidade do povo acreano.
-`,
+    modalDescription: `**A Festa de Praia do Acre**\n\n**Origem e Desenvolvimento (Século XX)**\nA Festa de Praia surgiu a partir do costume das comunidades acreanas de aproveitar as praias naturais que aparecem durante o período de estiagem dos rios amazônicos. Com a diminuição do nível das águas entre os meses de julho e setembro, extensas faixas de areia tornam-se espaços de lazer, convivência e celebração para a população local.\n\n**Transformação em Evento Cultural**\nAo longo dos anos, esses encontros informais evoluíram para grandes festivais organizados por prefeituras e comunidades. As festas passaram a incluir shows musicais, apresentações culturais, competições esportivas, concursos de beleza, feiras de artesanato e barracas com comidas típicas, atraindo visitantes de diversas regiões.\n\n**Valorização da Cultura Acreana**\nMais do que um evento recreativo, a Festa de Praia tornou-se uma importante manifestação cultural do Acre. Ela fortalece o turismo, movimenta a economia local e valoriza as tradições das populações ribeirinhas, destacando a importância dos rios para a história, a cultura e a identidade do povo acreano.`,
     image: festivalDePraiaImage,
     rating: 4,
   },
@@ -44,13 +36,7 @@ Mais do que um evento recreativo, a Festa de Praia tornou-se uma importante mani
     category: 'Monumento',
     location: 'Xapuri',
     description: 'As seringueiras (Hevea brasiliensis) são as grandes protagonistas da história econômica, social e geográfica do Acre. Foi a busca pelo látex que desenhou as fronteiras do estado e atraiu as primeiras grandes levas de migrantes.',
-    modalDescription: `
-### As Seringueiras
-#### O Ciclo da Borracha (Século XIX e início do Século XX)
-As seringueiras (Hevea brasiliensis) desempenharam um papel fundamental na história do Acre. A partir da segunda metade do século XIX, a crescente demanda mundial por borracha impulsionou a extração do látex, atraindo milhares de trabalhadores para a região amazônica. A atividade seringalista promoveu o povoamento do território, movimentou a economia local e contribuiu diretamente para a consolidação da presença brasileira no Acre.
-#### Importância Histórica e Econômica
-Além de impulsionar o desenvolvimento regional, as seringueiras tornaram-se um símbolo da identidade acreana. A riqueza gerada pela borracha influenciou a formação de cidades, o crescimento do comércio e os acontecimentos que culminaram na incorporação do Acre ao território brasileiro.
-`,
+    modalDescription: `**As Seringueiras**\n\n**O Ciclo da Borracha (Século XIX e início do Século XX)**\nAs seringueiras (Hevea brasiliensis) desempenharam um papel fundamental na história do Acre. A partir da segunda metade do século XIX, a crescente demanda mundial por borracha impulsionou a extração do látex, atraindo milhares de trabalhadores para a região amazônica. A atividade seringalista promoveu o povoamento do território, movimentou a economia local e contribuiu diretamente para a consolidação da presença brasileira no Acre.\n\n**Importância Histórica e Econômica**\nAlém de impulsionar o desenvolvimento regional, as seringueiras tornaram-se um símbolo da identidade acreana. A riqueza gerada pela borracha influenciou a formação de cidades, o crescimento do comércio e os acontecimentos que culminaram na incorporação do Acre ao território brasileiro.`,
     image: seringueiraImage,
     rating: 5,
   },
@@ -59,103 +45,95 @@ Além de impulsionar o desenvolvimento regional, as seringueiras tornaram-se um 
     category: 'Monumento',
     location: 'Rio Branco',
     description: 'Oficialmente chamado de Mercado Municipal Elpídio Ribeiro, é um dos principais pontos turísticos, culturais e gastronômicos da capital do Acre, Rio Branco. Localizado às margens do Rio Acre, ele carrega grande parte da identidade e da história do estado.',
-    modalDescription: `
-### Mercado Velho de Rio Branco
-#### Centro Comercial e Ponto de Encontro
-Localizado às margens do Rio Acre, o Mercado Velho foi um dos principais centros comerciais de Rio Branco durante o período de expansão econômica da borracha. O espaço reunia comerciantes, seringueiros e viajantes, funcionando como importante local de troca de mercadorias e circulação de produtos regionais.
-#### Patrimônio Histórico do Acre
-Ao longo dos anos, o Mercado Velho consolidou-se como um dos mais importantes patrimônios históricos e culturais da capital acreana. Atualmente, o local preserva a memória do desenvolvimento econômico e social do estado, sendo um símbolo das tradições, da arquitetura e da história de Rio Branco.
-`,
+    modalDescription: `**Mercado Velho de Rio Branco**\n\n**Centro Comercial e Ponto de Encontro**\nLocalizado às margens do Rio Acre, o Mercado Velho foi um dos principais centros comerciais de Rio Branco durante o período de expansão econômica da borracha. O espaço reunia comerciantes, seringueiros e viajantes, funcionando como importante local de troca de mercadorias e circulação de produtos regionais.\n\n**Patrimônio Histórico do Acre**\nAo longo dos anos, o Mercado Velho consolidou-se como um dos mais importantes patrimônios históricos e culturais da capital acreana. Atualmente, o local preserva a memória do desenvolvimento econômico e social do estado, sendo um símbolo das tradições, da arquitetura e da história de Rio Branco.`,
     image: mercadoVelhoImage,
     rating: 4,
   },
-  {
-    name: 'Pirarucu com Tucupi',
-    category: 'Comida Típica',
-    location: 'Acre',
-    description: 'É uma verdadeira joia da culinária amazônica, combinando dois dos ingredientes mais emblemáticos da região em um prato que é puro sabor, história e identidade.',
-    modalDescription: 'O Pirarucu com Tucupi é uma especialidade da culinária acreana que você não pode deixar de provar!',
-    image: culinariaAcreanaImage,
-    rating: 5,
-  },
+ 
 ];
 
-const CarouselCard = ({ item }: { item: Place }) => (
-    <View style={styles.carouselCard}>
-      <Image source={item.image} style={styles.carouselCardImage} />
-      <View style={styles.carouselCardContent}>
-        <Text style={styles.carouselCardTitle}>{item.name}</Text>
-        <Text style={styles.carouselCardDescription} numberOfLines={3}>{item.description}</Text>
+const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
+  <TouchableOpacity onPress={() => onPress(place)}>
+    <View style={styles.card}>
+      <Image source={place.image} style={styles.cardImage} />
+      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
+        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
+      </TouchableOpacity>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{place.name}</Text>
+        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
+        <Text style={styles.cardDescription}>{place.description}</Text>
       </View>
     </View>
-  );
+  </TouchableOpacity>
+);
+
+const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
+  if (!place) return null;
 
   const renderDescription = (description: string) => {
-    const sections = description.split('###').filter(s => s.trim());
-    return sections.map((section, index) => {
-        const parts = section.split('####');
-        const mainTitle = parts[0].trim();
-        return (
-            <View key={index}>
-                <Text style={styles.modalSubtitle}>{mainTitle}</Text>
-                {parts.slice(1).map((subSection, subIndex) => {
-                    const subParts = subSection.split('\n');
-                    const subTitle = subParts[0].trim();
-                    const content = subParts.slice(1).join('\n').trim();
-                    return (
-                        <View key={subIndex}>
-                            <Text style={styles.modalSubSubtitle}>{subTitle}</Text>
-                            <Text style={styles.modalDescription}>{content}</Text>
-                        </View>
-                    )
-                })}
-            </View>
-        )
-    })
+    const parts = (description || '').split('**');
+    return (
+      <Text style={styles.modalDescription}>
+        {parts.map((part, index) => {
+          if (index % 2 === 1) {
+            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
+          }
+          return part;
+        })}
+      </Text>
+    );
   };
 
+  return (
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Image source={place.image} style={styles.modalImage} />
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+            <Text style={styles.modalCloseBtnText}>✕</Text>
+          </TouchableOpacity>
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.modalTitleRow}>
+              <Text style={styles.modalTitle}>{place.name}</Text>
+              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
+                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
+            {renderDescription(place.modalDescription || place.description)}
+          </ScrollView>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function Acre() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('Cultura Local');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const flatListRef = useRef<FlatList<Place>>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
 
-  const onScroll = (event: any) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / (screenWidth - 40));
-    setActiveIndex(index);
+  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
+
+  const handlePontoFavorito = (nome: string) => {
+    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
   };
 
-  const renderCulturaLocal = () => (
-    <>
-      <FlatList
-        ref={flatListRef}
-        data={places}
-        renderItem={({ item }) => (
-            <CarouselCard item={item} />
-        )}
-        keyExtractor={item => item.name}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        style={{ width: screenWidth }}
-        snapToInterval={screenWidth-40}
-        decelerationRate="fast"
-        contentContainerStyle={{paddingHorizontal: 20}}
-      />
-      <View style={styles.pagination}>
-        {places.map((_, i) => (
-          <Text key={i} style={i === activeIndex ? styles.paginationActiveText : styles.paginationText}>
-            •
-          </Text>
-        ))}
-      </View>
-      <ScrollView style={styles.descriptionContainer}>
-        {renderDescription(places[activeIndex].modalDescription || places[activeIndex].description)}
-      </ScrollView>
-    </>
-  );
+  const openModal = useCallback((place: Place) => {
+    setSelectedPlace(place);
+    setModalVisible(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+    setSelectedPlace(null);
+  }, []);
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -167,52 +145,47 @@ export default function Acre() {
           <Image source={headerImage} style={styles.headerImage} />
         </View>
 
-        <View style={styles.tabs}>
-          <TouchableOpacity onPress={() => setActiveTab('Historia')} style={[styles.tabButton, activeTab === 'Historia' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Historia' && styles.activeTabText]}>História</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab('Cultura Local')} style={[styles.tabButton, activeTab === 'Cultura Local' && styles.activeTab]}>
-            <Text style={[styles.tabText, activeTab === 'Cultura Local' && styles.activeTabText]}>Cultura Local</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.content}>
-          {activeTab === 'Historia' ? (
-            <View style={styles.historyContainer}>
-              <Text style={styles.historyTitle}>A Terra Conquistada na Raça e na Diplomacia</Text>
-
-              <Text style={styles.historySubtitle}>O Boom da Borracha e a Invasão Nordestina (Séc. XIX)</Text>
-              <Text style={styles.historyText}>
-                Até meados do século XIX, a região era habitada quase que exclusivamente por diversas etnias indígenas. Internacionalmente, o território era reconhecido como boliviano pelo Tratado de Ayacucho (1867). Tudo mudou com a demanda por látex da Revolução Industrial, atraindo milhares de nordestinos que fugiam da Grande Seca de 1877.
-              </Text>
-
+        <AbasSwipe
+          cor={"#00796b"}
+          historia={
+            <View style={styles.content}>
+              <View style={styles.historyContainer}>
+                <Text style={styles.historyTitle}>Da Floresta Amazônica à Conquista da Identidade Brasileira</Text>
+              <Text style={styles.historySubtitle}>Os Primeiros Habitantes</Text>
+              <Text style={styles.historyText}>Muito antes da chegada dos europeus, a região do atual Acre era habitada por diversos povos indígenas, como os Huni Kuin (Kaxinawá), Ashaninka, Yawanawá, Katukina e outros grupos. Pelo Tratado de Ayacucho (1867), a área era oficialmente reconhecida como pertencente à Bolívia.</Text>
+              <Text style={styles.historySubtitle}>O Ciclo da Borracha e a Migração Nordestina</Text>
+              <Text style={styles.historyText}>A história do Acre mudou no final do século XIX com a expansão do Ciclo da Borracha. Milhares de nordestinos migraram para a região fugindo das secas severas, passando a atuar nos seringais e extraindo látex das seringueiras. Embora o território pertencesse à Bolívia, a maioria da população passou a ser formada por brasileiros.</Text>
               <Text style={styles.historySubtitle}>A Revolução Acreana (1899–1903)</Text>
-              <Text style={styles.historyText}>
-                Quando a Bolívia tentou retomar o controle, os seringueiros brasileiros se revoltaram. O militar gaúcho Plácido de Castro liderou um exército de seringueiros que venceram as tropas bolivianas em 1903, consolidando o controle brasileiro sobre a região.
-              </Text>
-
+              <Text style={styles.historyText}>Entre 1899 e 1903 ocorreram diversas revoltas conhecidas como Revolução Acreana. O movimento ganhou força sob a liderança de Plácido de Castro, que organizou forças militares que enfrentaram tropas bolivianas e conquistaram o controle da região.</Text>
               <Text style={styles.historySubtitle}>O Tratado de Petrópolis (1903)</Text>
-              <Text style={styles.historyText}>
-                O Barão do Rio Branco negociou o Tratado de Petrópolis. O Brasil anexou o Acre em troca do pagamento de 2 milhões de libras esterlinas e da construção da Estrada de Ferro Madeira-Mamoré.
-              </Text>
-
+              <Text style={styles.historyText}>Em 1903, sob a liderança do Barão do Rio Branco, foi assinado o Tratado de Petrópolis. O Brasil incorporou oficialmente o Acre ao seu território em troca do pagamento de 2 milhões de libras esterlinas, da cessão de pequenas áreas fronteiriças e da construção da Estrada de Ferro Madeira-Mamoré.</Text>
               <Text style={styles.historySubtitle}>De Território a Estado (1904–1962)</Text>
-              <Text style={styles.historyText}>
-                O Acre foi transformado em Território Federal sem autonomia política. A longa luta pela autonomia só terminou em 15 de junho de 1962, quando o Acre foi elevado à categoria de Estado, com Rio Branco como sua capital.
-              </Text>
+              <Text style={styles.historyText}>Após sua incorporação, o Acre foi transformado em Território Federal em 1904. Em 15 de junho de 1962, o Acre foi finalmente elevado à categoria de estado brasileiro, com Rio Branco como capital.</Text>
+              <Text style={styles.historySubtitle}>Chico Mendes e a Defesa da Amazônia</Text>
+              <Text style={styles.historyText}>Durante a segunda metade do século XX, Chico Mendes liderou movimentos em defesa dos trabalhadores da floresta e da preservação ambiental. Após seu assassinato em 1988, transformou-se em símbolo global da conservação ambiental e dos direitos das populações tradicionais.</Text>
+              </View>
             </View>
-          ) : (
-            renderCulturaLocal()
-          )}
-        </View>
+          }
+          culturaLocal={
+            <View style={styles.content}>
+              <LocalList sigla="AC" imagensLocais={{
+              'Seringueiras': seringueiraImage,
+              'Mercado Velho': mercadoVelhoImage,
+              'Festival de Praia': festivalDePraiaImage,
+            }} />
+            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+            </View>
+          }
+        />
       </ScrollView>
+      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e0f2f1' },
-  header: { height: 250 },
+  container: { flex: 1, backgroundColor: '#0A172A' },
+  header: { height: 250, position: 'relative' },
   headerImage: { width: '100%', height: '100%' },
   backButton: { position: 'absolute', top: 40, left: 20, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
   backButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
@@ -221,63 +194,31 @@ const styles = StyleSheet.create({
   activeTab: { backgroundColor: '#00796b' },
   tabText: { color: '#00796b', fontWeight: 'bold', fontSize: 16 },
   activeTabText: { color: '#fff' },
-  content: { paddingVertical: 20, alignItems: 'center', width: '100%'},
-  historyContainer: { backgroundColor: '#fff', borderRadius: 15, padding: 20, marginHorizontal: 20 },
-  historyTitle: { fontSize: 22, fontWeight: 'bold', color: '#00796b', marginBottom: 15, textAlign: 'center' },
-  historySubtitle: { fontSize: 18, fontWeight: 'bold', color: '#00796b', marginTop: 10, marginBottom: 5 },
-  historyText: { fontSize: 16, color: '#333', lineHeight: 24, marginBottom: 10 },
-  carouselCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    width: screenWidth - 80,
-    marginHorizontal: 10
-  },
-  carouselCardImage: {
-    width: '100%',
-    height: 180,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-  },
-  carouselCardContent: {
-    padding: 15,
-  },
-  carouselCardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00796b',
-  },
-  carouselCardDescription: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 5,
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  paginationText: {
-    fontSize: 30,
-    color: '#888',
-    marginHorizontal: 2,
-  },
-  paginationActiveText: {
-    fontSize: 30,
-    color: '#00796b',
-    marginHorizontal: 2,
-  },
-  descriptionContainer: {
-    paddingHorizontal: 20,
-    maxHeight: 300
-  },
-  modalSubtitle: { fontSize: 20, fontWeight: 'bold', color: '#00796b', marginTop: 15, marginBottom: 5 },
-  modalSubSubtitle: { fontSize: 18, fontWeight: 'bold', color: '#00796b', marginTop: 10, marginBottom: 5 },
-  modalDescription: { fontSize: 16, color: '#333', lineHeight: 24 },
+  content: { padding: 20 },
+  historyContainer: { backgroundColor: '#1E2F4A', borderRadius: 15, padding: 20 },
+  historyTitle: { fontSize: 22, fontWeight: 'bold', color: '#FFC700', marginBottom: 15, textAlign: 'center' },
+  historySubtitle: { fontSize: 18, fontWeight: 'bold', color: '#FFC700', marginTop: 10, marginBottom: 5 },
+  historyText: { fontSize: 16, color: '#ccc', lineHeight: 24, marginBottom: 10 },
+  categoryHeader: { fontSize: 20, fontWeight: 'bold', color: '#FFC700', marginTop: 15, marginBottom: 5 },
+  separator: { height: 1, backgroundColor: '#e0e0e0', marginVertical: 10, marginBottom: 15 },
+  card: { backgroundColor: '#2A3F5F', borderRadius: 15, marginBottom: 20, elevation: 3 },
+  cardHeart: { position: 'absolute', top: 10, right: 10, zIndex: 1, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: 5 },
+  cardImage: { width: '100%', height: 150, borderTopLeftRadius: 15, borderTopRightRadius: 15 },
+  cardContent: { padding: 15 },
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFC700' },
+  cardCategory: { fontSize: 14, color: '#aaa', marginVertical: 5 },
+  cardDescription: { fontSize: 14, color: '#ccc' },
+  modalContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+  modalContent: { backgroundColor: '#1E2F4A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+  modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalCloseBtn: { position: 'absolute', top: 14, right: 14, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, width: 30, height: 30, justifyContent: 'center', alignItems: 'center' },
+  modalCloseBtnText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  modalBody: { padding: 20 },
+  modalTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 16, marginBottom: 5 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', flex: 1, marginRight: 10 },
+  modalCategory: { fontSize: 14, color: '#aaa', marginBottom: 10, paddingHorizontal: 20 },
+  modalDescription: { fontSize: 15, color: '#ddd', lineHeight: 23 },
+  modalSubtitle: { fontWeight: 'bold', color: '#FFC700' },
+  closeButton: { backgroundColor: '#FFC700', margin: 20, marginTop: 0, borderRadius: 25, paddingVertical: 13, alignItems: 'center' },
+  closeButtonText: { color: '#0A172A', fontWeight: 'bold', fontSize: 15 },
 });
