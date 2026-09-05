@@ -1,7 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import {
+  Image, Modal, StyleSheet, Text,
+  TouchableOpacity, TouchableWithoutFeedback, View
+} from 'react-native';
 import { comida, themes, useSettings } from '../context/SettingsContext';
 
 type NavPage = 'inicio' | 'estados' | 'favoritos' | 'perfil';
@@ -18,6 +22,15 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
   const { theme } = useSettings();
   const t = comida;
   const c = themes[theme];
+  const [nomeUsuario, setNomeUsuario] = useState('');
+  const [userImage, setUserImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (menuVisible) {
+      SecureStore.getItemAsync('nome').then(n => { if (n) setNomeUsuario(n); });
+      SecureStore.getItemAsync('user_image').then(i => { if (i) setUserImage(i); });
+    }
+  }, [menuVisible]);
 
   const navItems: { key: NavPage; icon: string; activeIcon: string; route: string }[] = [
     { key: 'inicio',    icon: 'home-outline',   activeIcon: 'home',   route: '/(tabs)/inicio' },
@@ -25,8 +38,6 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
     { key: 'favoritos', icon: 'heart-outline',  activeIcon: 'heart',  route: '/favoritos' },
     { key: 'perfil',    icon: 'person-outline', activeIcon: 'person', route: '/perfil' },
   ];
-
-
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -66,8 +77,13 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPressOut={onMenuClose}>
           <TouchableWithoutFeedback>
             <View style={[styles.modalView, { backgroundColor: c.nav }]}>
-
-              {/* language selector disabled temporarily */}
+              <View style={styles.userInfoContainer}>
+                <Image
+                  source={userImage ? { uri: userImage } : require('../../assets/images/logo.png')}
+                  style={styles.userImage}
+                />
+                <Text style={[styles.userName, { color: c.text }]}>{nomeUsuario || 'Visitante'}</Text>
+              </View>
 
               <View style={[styles.divider, { borderColor: c.subtext }]} />
 
@@ -102,11 +118,21 @@ const styles = StyleSheet.create({
   navLogo: { width: 65, height: 65 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   modalView: { height: '100%', width: '75%', paddingTop: 60, paddingHorizontal: 20 },
-  menuSection: { fontSize: 13, fontWeight: '600', marginBottom: 10, marginTop: 20 },
-  langRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  langBtn: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
-  langText: { fontSize: 13, fontWeight: '600' },
-  themeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
+  userInfoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  userImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 10,
+    backgroundColor: '#ccc',
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   divider: { borderTopWidth: 1, marginVertical: 20 },
   modalItem: { paddingVertical: 15 },
   modalClose: { position: 'absolute', bottom: 30, borderTopWidth: 1, paddingHorizontal: 20 },

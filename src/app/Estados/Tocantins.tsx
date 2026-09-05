@@ -1,9 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/to.png');
@@ -136,7 +136,7 @@ export default function Tocantins() {
 
   return (
     <View style={{ flex: 1 }}>
-      <TouchableOpacity onPress={() => router.push('/lugares')} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
       <ScrollView style={styles.container}>

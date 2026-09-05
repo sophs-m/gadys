@@ -1,8 +1,7 @@
+import { useRouter } from 'expo-router';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const headerImage = require('../../../assets/images/estados/sp.png');
 const maspImage = require('../../../assets/images/sp/masp.png');
@@ -15,7 +14,7 @@ export default function SaoPaulo() {
 
   return (
     <View style={{ flex: 1 }}>
-      <TouchableOpacity onPress={() => router.push('/estados')} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
       <ScrollView style={styles.container}>

@@ -137,7 +137,7 @@ export default function Acre() {
 
   return (
     <View style={{ flex: 1 }}>
-      <TouchableOpacity onPress={() => router.push('/estados')} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
       <ScrollView style={styles.container}>

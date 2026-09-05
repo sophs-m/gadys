@@ -23,7 +23,6 @@ export default function Perfil() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(AVATAR_KEY).then(v => { if (v) setImage(v); });
     loadUsuario();
   }, []);
 
@@ -34,7 +33,12 @@ export default function Perfil() {
       const { data } = await api.get(`/api/usuarios/${usuarioId}`);
       setNome(data.nome ?? '');
       setEmail(data.email ?? '');
-    } catch {}
+      if (data.imagem_perfil) {
+        setImage(data.imagem_perfil);
+      }
+    } catch (error) {
+      Alert.alert('Erro de Conexão', 'Não foi possível carregar os dados do perfil.');
+    }
   };
 
   const pickImage = async () => {
@@ -58,11 +62,11 @@ export default function Perfil() {
     if (!usuarioId) return;
     setSaving(true);
     try {
-      await api.put(`/api/usuarios/${usuarioId}`, { nome, email, senha: '' });
+      await api.put(`/api/usuarios/${usuarioId}`, { nome, email });
       await SecureStore.setItemAsync('nome', nome);
       Alert.alert('Sucesso', 'Perfil atualizado!');
-    } catch {
-      Alert.alert('Erro', 'Não foi possível salvar as alterações.');
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar as alterações. Tente novamente.');
     } finally {
       setSaving(false);
     }
@@ -132,12 +136,18 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 55, paddingBottom: 15, paddingHorizontal: 20 },
   menuBtn: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { fontSize: 22, fontWeight: 'bold' },
-  profileContainer: { flex: 1, alignItems: 'center', paddingHorizontal: 20, paddingTop: 50 },
+  profileContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   avatarContainer: { marginBottom: -50, zIndex: 1 },
   avatarWrapper: { position: 'relative' },
   avatar: { width: 100, height: 100, borderRadius: 50, borderWidth: 3 },
   cameraBtn: { position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
-  formContainer: { padding: 30, paddingTop: 70, borderRadius: 20, width: '100%' },
+  formContainer: {
+    paddingHorizontal: 30,
+    paddingTop: 70,
+    paddingBottom: 40,
+    borderRadius: 20,
+    width: '90%',
+  },
   label: { marginBottom: 5, fontSize: 14 },
   input: { borderBottomWidth: 1, marginBottom: 20, paddingVertical: 8, fontSize: 16 },
   button: { padding: 15, borderRadius: 25, alignItems: 'center', marginTop: 10 },

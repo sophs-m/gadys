@@ -12,20 +12,7 @@ const timeline = [
   {
     year: '1500', title: 'Descobrimento do Brasil',
     highlights: ['Os Principais Fatos de 1500:'],
-    description: `O 'descobrimento' do Brasil ocorreu em 22 de abril de 1500, quando a frota portuguesa comandada por Pedro Álvares Cabral chegou ao litoral do atual estado da Bahia, na região de Porto Seguro. Embora o termo 'descobrimento' seja consagrado historicamente, hoje os historiadores preferem falar em achamento ou chegada, já que o território já era habitado por milhões de indígenas muito antes da frota europeia despontar no horizonte.
-
-Os Principais Fatos de 1500:
-* A Expedição: Cabral partiu de Lisboa em março de 1500 com uma frota imponente de 13 embarcações. O objetivo oficial era contornar a África para chegar às Índias (onde o comércio de especiarias era altamente lucrativo), mas a rota fez um desvio intencional para o Ocidente.
-
-* O Primeiro Sinal: No dia 21 de abril, os marinheiros avistaram plantas marinhas. No dia seguinte, 22 de abril, viram terra firme e avistaram um monte arredondado, batizado de Monte Pascoal (pois era semana de Páscoa).
-
-* Os Primeiros Nomes: Inicialmente, os portugueses pensaram tratar-se de uma ilha e deram o nome de Ilha de Vera Cruz. Mais tarde, ao perceberem a imensidão da costa, mudaram para Terra de Santa Cruz. O nome Brasil só pegou anos depois, devido à abundância de pau-brasil, madeira cuja resina vermelha era usada para tingir tecidos na Europa.
-
-* O primeiro encontro entre os portugueses e os povos indígenas (da etnia Tupinambá) foi pacífico, marcado pela troca de objetos (escambo) e pela estranheza mútua de vestimentas, idiomas e costumes.
-
-* A Primeira Missa: No dia 26 de abril, foi celebrada a primeira missa no solo brasileiro pelo frei Henrique de Coimbra, simbolizando a posse da terra pela Coroa Portuguesa e pela Igreja Católica.
-
-* Casualidade ou Intencionalidade? Há um grande debate se Cabral chegou aqui por acidente ('desvio de rota devido às correntes marinhas') ou de propósito. A maioria dos historiadores modernos defende que Portugal já sabia da existência de terras ao sul desde o Tratado de Tordesilhas (1494) e que a viagem de Cabral serviu para oficializar e tomar posse desse território.`,
+    description: `O 'descobrimento' do Brasil ocorreu em 22 de abril de 1500, quando a frota portuguesa comandada por Pedro Álvares Cabral chegou ao litoral do atual estado da Bahia, na região de Porto Seguro. Embora o termo 'descobrimento' seja consagrado historicamente, hoje os historiadores preferem falar em achamento ou chegada, já que o território já era habitado por milhões de indígenas muito antes da frota europeia despontar no horizonte.\n\nOs Principais Fatos de 1500:\n* A Expedição: Cabral partiu de Lisboa em março de 1500 com uma frota imponente de 13 embarcações. O objetivo oficial era contornar a África para chegar às Índias (onde o comércio de especiarias era altamente lucrativo), mas a rota fez um desvio intencional para o Ocidente.\n\n* O Primeiro Sinal: No dia 21 de abril, os marinheiros avistaram plantas marinhas. No dia seguinte, 22 de abril, viram terra firme e avistaram um monte arredondado, batizado de Monte Pascoal (pois era semana de Páscoa).\n\n* Os Primeiros Nomes: Inicialmente, os portugueses pensaram tratar-se de uma ilha e deram o nome de Ilha de Vera Cruz. Mais tarde, ao perceberem a imensidão da costa, mudaram para Terra de Santa Cruz. O nome Brasil só pegou anos depois, devido à abundância de pau-brasil, madeira cuja resina vermelha era usada para tingir tecidos na Europa.\n\n* O primeiro encontro entre os portugueses e os povos indígenas (da etnia Tupinambá) foi pacífico, marcado pela troca de objetos (escambo) e pela estranheza mútua de vestimentas, idiomas e costumes.\n\n* A Primeira Missa: No dia 26 de abril, foi celebrada a primeira missa no solo brasileiro pelo frei Henrique de Coimbra, simbolizando a posse da terra pela Coroa Portuguesa e pela Igreja Católica.\n\n* Casualidade ou Intencionalidade? Há um grande debate se Cabral chegou aqui por acidente ('desvio de rota devido às correntes marinhas') ou de propósito. A maioria dos historiadores modernos defende que Portugal já sabia da existência de terras ao sul desde o Tratado de Tordesilhas (1494) e que a viagem de Cabral serviu para oficializar e tomar posse desse território.`,
     route: '/Estados/Bahia', local: 'Bahia',
     photos: [
       require('../../assets/images/descobrimento/1.png'),
@@ -38,25 +25,7 @@ Os Principais Fatos de 1500:
   {
     year: '1549', title: 'Fundação de Salvador',
     highlights: ['Como foi a fundação?', 'A Divisão Geográfica (Cidade Alta vs. Cidade Baixa)'],
-    description: `A fundação de Salvador, em 29 de março de 1549, foi um dos marcos mais importantes da colonização portuguesa, pois ela nasceu com uma grande responsabilidade: ser a primeira capital do Brasil.
-
-Como foi a fundação?
-* O Fundador: A missão foi entregue a Tomé de Sousa, o primeiro Governador-Geral do Brasil. Ele chegou à Baía de Todos os Santos liderando uma frota que trazia mais de mil pessoas, incluindo soldados, funcionários públicos, jesuítas (liderados por Manuel da Nóbrega) e operários.
-
-* A Localização Estratégica: A cidade foi construída no alto de um grande penhasco (onde hoje fica o Centro Histórico e a Cidade Alta). Essa escolha foi puramente defensiva: do alto, os portugueses tinham uma visão privilegiada de toda a baía, facilitando a defesa contra navios inimigos. Além disso, a muralha de terra e paliçadas protegia a cidade por terra.
-
-* Caramuru, o Mediador: Quando os portugueses chegaram, foram recebidos por Diogo Álvares Correia, o Caramuru — um náufrago português que vivia com os indígenas locais (os Tupinambás) há décadas. Casado com a indígena Paraguaçu, Caramuru foi peça-chave para garantir que a fundação da cidade ocorresse em relativa paz no início, mediando o contato entre Tomé de Sousa e os nativos.
-
-A Divisão Geográfica (Cidade Alta vs. Cidade Baixa)
-O relevo de Salvador moldou a sua estrutura urbana, criando uma divisão que persiste até os dias de hoje:
-
-* Cidade Alta: Era o centro administrativo, político e religioso. Lá ficavam a Casa da Câmara e Cadeia, o Palácio do Governador, o colégio dos jesuítas e as moradias das autoridades.
-
-* Cidade Baixa: Era a zona portuária, voltada para o comércio, armazenamento de mercadorias e o cais, por onde entravam e saíam as riquezas da colônia.
-
-Primeira Capital: Salvador manteve o título de capital do Brasil por 214 anos. Em 1763, devido ao boom da extração de ouro e diamantes no Sudeste, a Coroa Portuguesa transferiu a capital para o Rio de Janeiro.
-
-Diferente de outras vilas que cresceram espontaneamente, Salvador foi uma cidade planejada por ordem do rei de Portugal, Dom João III, para centralizar a administração da colônia, que estava sofrendo com o fracasso das Capitanias Hereditárias e os ataques de piratas franceses.`,
+    description: `A fundação de Salvador, em 29 de março de 1549, foi um dos marcos mais importantes da colonização portuguesa, pois ela nasceu com uma grande responsabilidade: ser a primeira capital do Brasil.\n\nComo foi a fundação?\n* O Fundador: A missão foi entregue a Tomé de Sousa, o primeiro Governador-Geral do Brasil. Ele chegou à Baía de Todos os Santos liderando uma frota que trazia mais de mil pessoas, incluindo soldados, funcionários públicos, jesuítas (liderados por Manuel da Nóbrega) e operários.\n\n* A Localização Estratégica: A cidade foi construída no alto de um grande penhasco (onde hoje fica o Centro Histórico e a Cidade Alta). Essa escolha foi puramente defensiva: do alto, os portugueses tinham uma visão privilegiada de toda a baía, facilitando a defesa contra navios inimigos. Além disso, a muralha de terra e paliçadas protegia a cidade por terra.\n\n* Caramuru, o Mediador: Quando os portugueses chegaram, foram recebidos por Diogo Álvares Correia, o Caramuru — um náufrago português que vivia com os indígenas locais (os Tupinambás) há décadas. Casado com a indígena Paraguaçu, Caramuru foi peça-chave para garantir que a fundação da cidade ocorresse em relativa paz no início, mediando o contato entre Tomé de Sousa e os nativos.\n\nA Divisão Geográfica (Cidade Alta vs. Cidade Baixa)\nO relevo de Salvador moldou a sua estrutura urbana, criando uma divisão que persiste até os dias de hoje:\n\n* Cidade Alta: Era o centro administrativo, político e religioso. Lá ficavam a Casa da Câmara e Cadeia, o Palácio do Governador, o colégio dos jesuítas e as moradias das autoridades.\n\n* Cidade Baixa: Era a zona portuária, voltada para o comércio, armazenamento de mercadorias e o cais, por onde entravam e saíam as riquezas da colônia.\n\nPrimeira Capital: Salvador manteve o título de capital do Brasil por 214 anos. Em 1763, devido ao boom da extração de ouro e diamantes no Sudeste, a Coroa Portuguesa transferiu a capital para o Rio de Janeiro.\n\nDiferente de outras vilas que cresceram espontaneamente, Salvador foi uma cidade planejada por ordem do rei de Portugal, Dom João III, para centralizar a administração da colônia, que estava sofrendo com o fracasso das Capitanias Hereditárias e os ataques de piratas franceses.`,
     route: '/Estados/Bahia', local: 'Bahia',
     photos: [
       require('../../assets/images/fundacao/1.png'),
@@ -70,34 +39,7 @@ Diferente de outras vilas que cresceram espontaneamente, Salvador foi uma cidade
   {
     year: '1808', title: 'Chegada da Família Real',
     highlights: ['Por que a Família Real fugiu para o Brasil?', 'A Escala na Bahia e a Abertura dos Portos', 'A Chegada ao Rio de Janeiro e as Transformações'],
-    description: `A transferência da corte portuguesa para o Brasil, em 1808, foi um acontecimento sem precedentes na história: foi a única vez em que um monarca europeu cruzou o oceano para governar seu império a partir de uma colônia.
-
-Esse evento mudou os rumos do Brasil para sempre, acelerando o processo que levaria à nossa independência.
-
-Por que a Família Real fugiu para o Brasil?
-A vinda da corte foi uma fuga estratégica. No final de 1807, o imperador francês Napoleão Bonaparte dominava a Europa e havia decretado o Bloqueio Continental, proibindo todos os países de comercializarem com a Inglaterra.
-
-Portugal se viu em um beco sem saída:
-
-* Se obedecesse a Napoleão, seria invadido pela Inglaterra (sua maior parceira comercial e protetora militar).
-
-* Se mantivesse o comércio com a Inglaterra, seria invadido pela França.
-
-Diante da invasão iminente das tropas francesas, o príncipe regente Dom João tomou uma decisão drástica: escoltada pela marinha britânica, toda a corte portuguesa (entre 10 mil e 15 mil pessoas, incluindo nobres, funcionários públicos, juízes e tesouros do reino) embarcou em navios rumo ao Brasil em novembro de 1807.
-
-A Escala na Bahia e a Abertura dos Portos
-A frota enfrentou tempestades violentas no Atlântico, e a primeira parada em solo brasileiro ocorreu em Salvador, em 22 de janeiro de 1808.
-
-Foi ali que Dom João assinou o decreto mais importante do período: a Abertura dos Portos às Nações Amigas (28 de janeiro de 1808). Na prática, isso acabou com o "pacto colonial", permitindo que o Brasil comercializasse diretamente com outros países — principalmente com a Inglaterra. Esse foi o primeiro passo real para a emancipação econômica do país.
-
-A Chegada ao Rio de Janeiro e as Transformações
-Em março de 1808, a corte finalmente se estabeleceu no Rio de Janeiro, que passou a funcionar como a sede do Império Português. Como a cidade era essencialmente colonial e pacata, ela precisou ser virada do avesso para abrigar a nobreza:
-
-* O "P.R.": Centenas de casas foram confiscadas dos moradores locais para abrigar os nobres. As portas dessas casas eram marcadas com as letras P.R. (Príncipe Regente), o que fez o povo ironizar o termo chamando-o de "Prédio Roubado" ou "Ponha-se na Rua".
-
-* Modernização Cultural e Científica: Para que o Estado funcionasse, Dom João fundou instituições essenciais: a Imprensa Régia, o Banco do Brasil, a Academia Real Militar, a Biblioteca Real (atual Biblioteca Nacional), o Jardim Botânico e as primeiras faculdades de Medicina (na Bahia e no Rio).
-
-Em 1815, o Brasil deixou oficialmente de ser uma colônia e foi elevado à categoria de Reino Unido a Portugal e Algarves, ganhando igualdade política com a metrópole.`,
+    description: `A transferência da corte portuguesa para o Brasil, em 1808, foi um acontecimento sem precedentes na história: foi a única vez em que um monarca europeu cruzou o oceano para governar seu império a partir de uma colônia.\n\nEsse evento mudou os rumos do Brasil para sempre, acelerando o processo que levaria à nossa independência.\n\nPor que a Família Real fugiu para o Brasil?\nA vinda da corte foi uma fuga estratégica. No final de 1807, o imperador francês Napoleão Bonaparte dominava a Europa e havia decretado o Bloqueio Continental, proibindo todos os países de comercializarem com a Inglaterra.\n\nPortugal se viu em um beco sem saída:\n\n* Se obedecesse a Napoleão, seria invadido pela Inglaterra (sua maior parceira comercial e protetora militar).\n\n* Se mantivesse o comércio com a Inglaterra, seria invadido pela França.\n\nDiante da invasão iminente das tropas francesas, o príncipe regente Dom João tomou uma decisão drástica: escoltada pela marinha britânica, toda a corte portuguesa (entre 10 mil e 15 mil pessoas, incluindo nobres, funcionários públicos, juízes e tesouros do reino) embarcou em navios rumo ao Brasil em novembro de 1807.\n\nA Escala na Bahia e a Abertura dos Portos\nA frota enfrentou tempestades violentas no Atlântico, e a primeira parada em solo brasileiro ocorreu em Salvador, em 22 de janeiro de 1808.\n\nFoi ali que Dom João assinou o decreto mais importante do período: a Abertura dos Portos às Nações Amigas (28 de janeiro de 1808). Na prática, isso acabou com o "pacto colonial", permitindo que o Brasil comercializasse diretamente com outros países — principalmente com a Inglaterra. Esse foi o primeiro passo real para a emancipação econômica do país.\n\nA Chegada ao Rio de Janeiro e as Transformações\nEm março de 1808, a corte finalmente se estabeleceu no Rio de Janeiro, que passou a funcionar como a sede do Império Português. Como a cidade era essencialmente colonial e pacata, ela precisou ser virada do avesso para abrigar a nobreza:\n\n* O "P.R.": Centenas de casas foram confiscadas dos moradores locais para abrigar os nobres. As portas dessas casas eram marcadas com as letras P.R. (Príncipe Regente), o que fez o povo ironizar o termo chamando-o de "Prédio Roubado" ou "Ponha-se na Rua".\n\n* Modernização Cultural e Científica: Para que o Estado funcionasse, Dom João fundou instituições essenciais: a Imprensa Régia, o Banco do Brasil, a Academia Real Militar, a Biblioteca Real (atual Biblioteca Nacional), o Jardim Botânico e as primeiras faculdades de Medicina (na Bahia e no Rio).\n\nEm 1815, o Brasil deixou oficialmente de ser uma colônia e foi elevado à categoria de Reino Unido a Portugal e Algarves, ganhando igualdade política com a metrópole.`,
     route: '/Estados/RioDeJaneiro', local: 'Rio de Janeiro',
     photos: [
       require('../../assets/images/chegada/1.png'),
@@ -110,27 +52,7 @@ Em 1815, o Brasil deixou oficialmente de ser uma colônia e foi elevado à categ
   {
     year: '1822', title: 'Independência do Brasil',
     highlights: ['O Caminho Até o Grito do Ipiranga', 'O 7 de Setembro e o Pós-Independência'],
-    description: `A Independência do Brasil, proclamada em 7 de setembro de 1822, foi o resultado de um processo de desgaste político entre a elite brasileira, o príncipe regente Dom Pedro e as Cortes de Lisboa (o parlamento português).
-
-Ao contrário das colônias espanholas na América, a independência do Brasil não fragmentou o território em várias repúblicas; o país manteve-se unificado sob um sistema monárquico (um Império).
-
-O Caminho Até o Grito do Ipiranga
-O estopim para a separação foi a Revolução Liberal do Porto (1820) em Portugal. Os políticos portugueses exigiam o retorno de Dom João VI para Lisboa e, pior do que isso, queriam que o Brasil voltasse ao status de colônia subordinada, revogando a autonomia conquistada desde 1808.
-
-Dom João VI retornou a Portugal em 1821, mas deixou seu filho, o jovem Dom Pedro, como príncipe regente do Brasil. A partir daí, a pressão de Lisboa aumentou:
-
-* O Dia do Fico (9 de janeiro de 1822): As Cortes portuguesas ordenaram o retorno imediato de Dom Pedro. Apoiado por uma petição com milhares de assinaturas da elite brasileira, o príncipe desobedeceu as ordens e declarou: "Se é para o bem de todos e felicidade geral da Nação, estou pronto! Digam ao povo que fico".
-
-* O Papel de Leopoldina e José Bonifácio: Enquanto Dom Pedro viajava a São Paulo para acalmar tensões políticas, novas ordens agressivas chegaram de Portugal, anulando todos os atos do príncipe. No dia 2 de setembro de 1822, a princesa Maria Leopoldina, atuando como regente interina no Rio de Janeiro, convocou o Conselho de Estado e, junto ao ministro José Bonifácio (o "Patriarca da Independência"), assinou a declaração formal de que o Brasil deveria se separar de Portugal.
-
-O 7 de Setembro e o Pós-Independência
-As cartas de Leopoldina e José Bonifácio alcançaram Dom Pedro nas margens do Riacho do Ipiranga, em São Paulo, no dia 7 de setembro. Ao ler as exigências de Portugal e os conselhos de sua esposa e ministros, o príncipe rompeu oficialmente os laços com a metrópole com o famoso brado "Independência ou Morte!".
-
-* Aclamação: Em 12 de outubro de 1822, ele foi aclamado Dom Pedro I, Imperador Constitucional do Brasil. Sua coroação ocorreu em dezembro do mesmo ano.
-
-* A Guerra da Independência: Embora o "grito" tenha sido pacífico, a separação não foi imediata em todo o território. Províncias como Bahia, Piauí, Maranhão e Grão-Pará tinham fortes tropas fiéis a Portugal. Houve sangrentos combates armados nessas regiões, e a expulsão definitiva dos portugueses só se consolidou em 1823 (com destaque para o 2 de Julho na Bahia).
-
-* O Reconhecimento: O primeiro país a reconhecer a nossa independência foram os Estados Unidos (1824). Portugal só aceitou o fato em 1825, após o Brasil concordar em pagar uma pesada indenização de 2 milhões de libras esterlinas à antiga metrópole.`,
+    description: `A Independência do Brasil, proclamada em 7 de setembro de 1822, foi o resultado de um processo de desgaste político entre a elite brasileira, o príncipe regente Dom Pedro e as Cortes de Lisboa (o parlamento português).\n\nAo contrário das colônias espanholas na América, a independência do Brasil não fragmentou o território em várias repúblicas; o país manteve-se unificado sob um sistema monárquico (um Império).\n\nO Caminho Até o Grito do Ipiranga\nO estopim para a separação foi a Revolução Liberal do Porto (1820) em Portugal. Os políticos portugueses exigiam o retorno de Dom João VI para Lisboa e, pior do que isso, queriam que o Brasil voltasse ao status de colônia subordinada, revogando a autonomia conquistada desde 1808.\n\nDom João VI retornou a Portugal em 1821, mas deixou seu filho, o jovem Dom Pedro, como príncipe regente do Brasil. A partir daí, a pressão de Lisboa aumentou:\n\n* O Dia do Fico (9 de janeiro de 1822): As Cortes portuguesas ordenaram o retorno imediato de Dom Pedro. Apoiado por uma petição com milhares de assinaturas da elite brasileira, o príncipe desobedeceu as ordens e declarou: "Se é para o bem de todos e felicidade geral da Nação, estou pronto! Digam ao povo que fico".\n\n* O Papel de Leopoldina e José Bonifácio: Enquanto Dom Pedro viajava a São Paulo para acalmar tensões políticas, novas ordens agressivas chegaram de Portugal, anulando todos os atos do príncipe. No dia 2 de setembro de 1822, a princesa Maria Leopoldina, atuando como regente interina no Rio de Janeiro, convocou o Conselho de Estado e, junto ao ministro José Bonifácio (o "Patriarca da Independência"), assinou a declaração formal de que o Brasil deveria se separar de Portugal.\n\nO 7 de Setembro e o Pós-Independência\nAs cartas de Leopoldina e José Bonifácio alcançaram Dom Pedro nas margens do Riacho do Ipiranga, em São Paulo, no dia 7 de setembro. Ao ler as exigências de Portugal e os conselhos de sua esposa e ministros, o príncipe rompeu oficialmente os laços com a metrópole com o famoso brado "Independência ou Morte!".\n\n* Aclamação: Em 12 de outubro de 1822, ele foi aclamado Dom Pedro I, Imperador Constitucional do Brasil. Sua coroação ocorreu em dezembro do mesmo ano.\n\n* A Guerra da Independência: Embora o "grito" tenha sido pacífico, a separação não foi imediata em todo o território. Províncias como Bahia, Piauí, Maranhão e Grão-Pará tinham fortes tropas fiéis a Portugal. Houve sangrentos combates armados nessas regiões, e a expulsão definitiva dos portugueses só se consolidou em 1823 (com destaque para o 2 de Julho na Bahia).\n\n* O Reconhecimento: O primeiro país a reconhecer a nossa independência foram os Estados Unidos (1824). Portugal só aceitou o fato em 1825, após o Brasil concordar em pagar uma pesada indenização de 2 milhões de libras esterlinas à antiga metrópole.`,
     route: '/Estados/MinasGerais', local: 'Minas Gerais',
     photos: [
       require('../../assets/images/independencia/1.png'),
@@ -143,32 +65,7 @@ As cartas de Leopoldina e José Bonifácio alcançaram Dom Pedro nas margens do 
   {
     year: '1889', title: 'Proclamação da República',
     highlights: ['Por que o Império ruiu? (As Causas)', 'O Dia 15 de Novembro', 'O "Povo Bestializado" e o Destino da Família Real'],
-    description: `A Proclamação da República, em 15 de novembro de 1889, foi o evento que pôs fim ao Império do Brasil (governado por Dom Pedro II) e deu início à era republicana presidencialista.
-
-Diferente da Independência, a República não nasceu de uma revolta popular, mas sim de um golpe político-militar articulado por elites descontentes e pelo Exército brasileiro.
-
-Por que o Império ruiu? (As Causas)
-Nas últimas décadas do século XIX, a monarquia brasileira perdeu suas três principais bases de sustentação, em um processo que os historiadores chamam de Crise do Império:
-
-* A Questão Abolicionista: Com a assinatura da Lei Áurea em 1888, que libertou os escravizados sem pagar indenização aos donos de terras, os grandes fazendeiros de café (conhecidos como "barões do café") abandonaram o apoio a Dom Pedro II. Eles se aliaram à causa republicana e ficaram conhecidos como republicanos de última hora.
-
-* A Questão Militar: Após a Guerra do Paraguai (1864–1870), o Exército brasileiro voltou fortalecido, com grande prestígio e influenciado pelo Positivismo (corrente filosófica que defendia o progresso científico e a ordem social). Os militares exigiam mais participação política e melhorias na carreira, o que era negado pelo governo imperial.
-
-* A Questão Religiosa: A Igreja Católica se afastou do imperador após Dom Pedro II prender dois bispos que haviam desafiado ordens imperiais para seguir diretrizes vindas diretamente do Papa.
-
-O Dia 15 de Novembro
-O movimento decisivo aconteceu no Rio de Janeiro (então capital do país) e foi liderado pelo marechal Deodoro da Fonseca, uma figura de imenso prestígio no Exército.
-
-Curiosamente, Deodoro era amigo do imperador e inicialmente não pretendia derrubar a monarquia; o plano original era apenas derrubar o gabinete de ministros (o Visconde de Ouro Preto). No entanto, boatos falsos espalhados por republicanos — afirmando que o governo imperial havia decretado a prisão de Deodoro e nomeado um de seus grandes inimigos políticos para o ministério — mudaram o rumo das coisas.
-
-Sentindo-se provocado, Deodoro marchou com as tropas até o Ministério da Guerra na Praça da Aclamação (atual Praça da República). Ali, o governo imperial se rendeu. A República foi consolidada politicamente poucas horas depois, liderada pelo jornalista e propagandista republicano Aristides Lobo e pelo político Benjamin Constant.
-
-O "Povo Bestializado" e o Destino da Família Real
-A transição foi cirúrgica e praticamente sem sangue. A participação popular foi nula, o que rendeu uma das frases mais famosas da história brasileira, dita por Aristides Lobo:
-
-"O povo assistiu àquilo bestializado, atônito, surpreso, sem conhecer o que significava. Muitos acreditavam sinceramente estar vendo uma parada militar."
-
-Dom Pedro II e a família imperial receberam um prazo de 48 horas para deixar o país na calada da noite, partindo rumo ao exílio na Europa em 17 de novembro, evitando manifestações de simpatia pública que o imperador ainda guardava. Deodoro da Fonseca assumiu como o primeiro presidente do Brasil, chefiando um governo provisório.`,
+    description: `A Proclamação da República, em 15 de novembro de 1889, foi o evento que pôs fim ao Império do Brasil (governado por Dom Pedro II) e deu início à era republicana presidencialista.\n\nDiferente da Independência, a República não nasceu de uma revolta popular, mas sim de um golpe político-militar articulado por elites descontentes e pelo Exército brasileiro.\n\nPor que o Império ruiu? (As Causas)\nNas últimas décadas do século XIX, a monarquia brasileira perdeu suas três principais bases de sustentação, em um processo que os historiadores chamam de Crise do Império:\n\n* A Questão Abolicionista: Com a assinatura da Lei Áurea em 1888, que libertou os escravizados sem pagar indenização aos donos de terras, os grandes fazendeiros de café (conhecidos como "barões do café") abandonaram o apoio a Dom Pedro II. Eles se aliaram à causa republicana e ficaram conhecidos como republicanos de última hora.\n\n* A Questão Militar: Após a Guerra do Paraguai (1864–1870), o Exército brasileiro voltou fortalecido, com grande prestígio e influenciado pelo Positivismo (corrente filosófica que defendia o progresso científico e a ordem social). Os militares exigiam mais participação política e melhorias na carreira, o que era negado pelo governo imperial.\n\n* A Questão Religiosa: A Igreja Católica se afastou do imperador após Dom Pedro II prender dois bispos que haviam desafiado ordens imperiais para seguir diretrizes vindas diretamente do Papa.\n\nO Dia 15 de Novembro\nO movimento decisivo aconteceu no Rio de Janeiro (então capital do país) e foi liderado pelo marechal Deodoro da Fonseca, uma figura de imenso prestígio no Exército.\n\nCuriosamente, Deodoro era amigo do imperador e inicialmente não pretendia derrubar a monarquia; o plano original era apenas derrubar o gabinete de ministros (o Visconde de Ouro Preto). No entanto, boatos falsos espalhados por republicanos — afirmando que o governo imperial havia decretado a prisão de Deodoro e nomeado um de seus grandes inimigos políticos para o ministério — mudaram o rumo das coisas.\n\nSentindo-se provocado, Deodoro marchou com as tropas até o Ministério da Guerra na Praça da Aclamação (atual Praça da República). Ali, o governo imperial se rendeu. A República foi consolidada politicamente poucas horas depois, liderada pelo jornalista e propagandista republicano Aristides Lobo e pelo político Benjamin Constant.\n\nO "Povo Bestializado" e o Destino da Família Real\nA transição foi cirúrgica e praticamente sem sangue. A participação popular foi nula, o que rendeu uma das frases mais famosas da história brasileira, dita por Aristides Lobo:\n\n"O povo assistiu àquilo bestializado, atônito, surpreso, sem conhecer o que significava. Muitos acreditavam sinceramente estar vendo uma parada militar."\n\nDom Pedro II e a família imperial receberam um prazo de 48 horas para deixar o país na calada da noite, partindo rumo ao exílio na Europa em 17 de novembro, evitando manifestações de simpatia pública que o imperador ainda guardava. Deodoro da Fonseca assumiu como o primeiro presidente do Brasil, chefiando um governo provisório.`,
     route: '/Estados/DistritoFederal', local: 'Distrito Federal',
     photos: [
       require('../../assets/images/proclamacao/1.png'),
@@ -181,39 +78,7 @@ Dom Pedro II e a família imperial receberam um prazo de 48 horas para deixar o 
   {
     year: 'Hoje', title: 'Brasil Atual',
     highlights: ['1. A Consolidação da Democracia', '2. Estabilização Econômica: O Fim da Hiperinflação', '3. Inclusão Social e a Nova Matriz Econômica', '4. Os Desafios Contemporâneos (Século XXI)'],
-    description: `Pensando no Brasil Atual dentro do contexto da História Geral, nós estamos vivendo o período conhecido como Nova República (ou Sexta República), que começou em 1985 com o fim da Ditadura Militar e se estende até o presente.
-
-Panorama de como o Brasil se consolidou historicamente nas últimas décadas:
-
-1. A Consolidação da Democracia
-Após 21 anos de regime militar, o Brasil passou por uma transição complexa para a democracia, marcada por três grandes pilares:
-
-* A Constituição de 1988: Conhecida como a "Constituição Cidadã", é o documento jurídico mais democrático da nossa história. Ela garantiu direitos civis fundamentais, o voto universal (incluindo analfabetos e jovens de 16 e 17 anos), a liberdade de expressão e a demarcação de terras indígenas.
-
-* Eleições Diretas: O retorno do voto direto para presidente em 1989 consolidou a alternância de poder, sobrevivendo a crises profundas, como os impeachments de Fernando Collor (1992) e Dilma Rousseff (2016).
-
-2. Estabilização Econômica: O Fim da Hiperinflação
-Até o início dos anos 1990, a grande assombração do brasileiro era a inflação, que chegava a passar de 80% ao mês. Os preços subiam nos supermercados várias vezes ao dia.
-
-* O Plano Real (1994): Capitaneado pela equipe econômica do governo de Itamar Franco (e liderado por Fernando Henrique Cardoso), o plano introduziu a nossa moeda atual, o Real, controlou a inflação e permitiu que o país planejasse seu crescimento a longo prazo, abrindo a economia para o mercado global.
-
-3. Inclusão Social e a Nova Matriz Econômica
-Nos anos 2000 (especialmente nos governos de Luiz Inácio Lula da Silva), o Brasil viveu um período de forte crescimento impulsionado pelo boom das commodities (exportação de soja, minério de ferro e petróleo).
-
-* Políticas de Combate à Pobreza: Programas de transferência de renda (como o Bolsa Família) e o aumento real do salário mínimo tiraram milhões de pessoas da extrema pobreza e criaram uma nova classe consumidora.
-
-* O Brasil no Palco Global: O país se consolidou como uma das 10 maiores economias do mundo, liderou a criação do bloco dos BRICS (Brasil, Rússia, Índia, China e África do Sul) e sediou eventos globais de enorme prestígio, como a Copa do Mundo de 2014 e as Olimpíadas de 2016.
-
-4. Os Desafios Contemporâneos (Século XXI)
-Apesar dos avanços na linha do tempo da história recente, o Brasil de hoje ainda luta contra problemas estruturais históricos:
-
-* Desigualdade e Violência: A distribuição de renda avançou, mas o Brasil continua sendo um dos países mais desiguais do planeta, com profundos abismos sociais e altos índices de violência urbana.
-
-* Polarização Política: A partir das manifestações de 2013 e da Operação Lava Jato, o país entrou em um ciclo de forte polarização ideológica entre a esquerda e a direita, moldando o debate público contemporâneo.
-
-* O Desafio Ambiental: Como detentor da maior parte da Floresta Amazônica, o Brasil ocupa o centro das atenções mundiais na luta contra as mudanças climáticas, equilibrando a potência do seu agronegócio com a necessidade urgente de preservação ambiental.
-
-O Brasil atual é, historicamente, uma democracia jovem que conseguiu estabilizar sua moeda e suas instituições, mas que ainda busca conciliar seu imenso potencial econômico com a justiça social para toda a sua população.`,
+    description: `Pensando no Brasil Atual dentro do contexto da História Geral, nós estamos vivendo o período conhecido como Nova República (ou Sexta República), que começou em 1985 com o fim da Ditadura Militar e se estende até o presente.\n\nPanorama de como o Brasil se consolidou historicamente nas últimas décadas:\n\n1. A Consolidação da Democracia\nApós 21 anos de regime militar, o Brasil passou por uma transição complexa para a democracia, marcada por três grandes pilares:\n\n* A Constituição de 1988: Conhecida como a "Constituição Cidadã", é o documento jurídico mais democrático da nossa história. Ela garantiu direitos civis fundamentais, o voto universal (incluindo analfabetos e jovens de 16 e 17 anos), a liberdade de expressão e a demarcação de terras indígenas.\n\n* Eleições Diretas: O retorno do voto direto para presidente em 1989 consolidou a alternância de poder, sobrevivendo a crises profundas, como os impeachments de Fernando Collor (1992) e Dilma Rousseff (2016).\n\n2. Estabilização Econômica: O Fim da Hiperinflação\nAté o início dos anos 1990, a grande assombração do brasileiro era a inflação, que chegava a passar de 80% ao mês. Os preços subiam nos supermercados várias vezes ao dia.\n\n* O Plano Real (1994): Capitaneado pela equipe econômica do governo de Itamar Franco (e liderado por Fernando Henrique Cardoso), o plano introduziu a nossa moeda atual, o Real, controlou a inflação e permitiu que o país planejasse seu crescimento a longo prazo, abrindo a economia para o mercado global.\n\n3. Inclusão Social e a Nova Matriz Econômica\nNos anos 2000 (especialmente nos governos de Luiz Inácio Lula da Silva), o Brasil viveu um período de forte crescimento impulsionado pelo boom das commodities (exportação de soja, minério de ferro e petróleo).\n\n* Políticas de Combate à Pobreza: Programas de transferência de renda (como o Bolsa Família) e o aumento real do salário mínimo tiraram milhões de pessoas da extrema pobreza e criaram uma nova classe consumidora.\n\n* O Brasil no Palco Global: O país se consolidou como uma das 10 maiores economias do mundo, liderou a criação do bloco dos BRICS (Brasil, Rússia, Índia, China e África do Sul) e sediou eventos globais de enorme prestígio, como a Copa do Mundo de 2014 e as Olimpíadas de 2016.\n\n4. Os Desafios Contemporâneos (Século XXI)\nApesar dos avanços na linha do tempo da história recente, o Brasil de hoje ainda luta contra problemas estruturais históricos:\n\n* Desigualdade e Violência: A distribuição de renda avançou, mas o Brasil continua sendo um dos países mais desiguais do planeta, com profundos abismos sociais e altos índices de violência urbana.\n\n* Polarização Política: A partir das manifestações de 2013 e da Operação Lava Jato, o país entrou em um ciclo de forte polarização ideológica entre a esquerda e a direita, moldando o debate público contemporâneo.\n\n* O Desafio Ambiental: Como detentor da maior parte da Floresta Amazônica, o Brasil ocupa o centro das atenções mundiais na luta contra as mudanças climáticas, equilibrando a potência do seu agronegócio com a necessidade urgente de preservação ambiental.\n\nO Brasil atual é, historicamente, uma democracia jovem que conseguiu estabilizar sua moeda e suas instituições, mas que ainda busca conciliar seu imenso potencial econômico com a justiça social para toda a sua população.`,
     route: '/Estados/Goias', local: 'Brasil',
     photos: [
       require('../../assets/images/atual/1.png'),
@@ -299,6 +164,14 @@ export default function TimelineCard() {
   const [selected, setSelected] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
   const slideRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (fullscreen) {
+      setTimeout(() => {
+        slideRef.current?.scrollTo({ x: selected * W, animated: false });
+      }, 50);
+    }
+  }, [fullscreen]);
 
   const scrollToSlide = (index: number) => {
     slideRef.current?.scrollTo({ x: index * W, animated: true });
