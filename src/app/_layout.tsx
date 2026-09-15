@@ -13,6 +13,8 @@ export default function RootLayout() {
         <Stack.Screen name="favoritos" />
         <Stack.Screen name="perfil" />
         <Stack.Screen name="lugares" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="faq" />
       </Stack>
     </SettingsProvider>
   );

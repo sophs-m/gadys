@@ -42,18 +42,15 @@ export default function Perfil() {
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      quality: 1,
     });
+  
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImage(uri);
-      AsyncStorage.setItem(AVATAR_KEY, uri);
+      setImage(result.assets[0].uri);
     }
   };
 

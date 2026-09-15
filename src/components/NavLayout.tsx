@@ -67,9 +67,14 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
         })}
       </View>
 
-      {/* LOGO CENTER */}
-      <TouchableOpacity style={[styles.navLogoContainer, { backgroundColor: c.nav }]} onPress={() => router.push('/(tabs)/inicio')}>
-        <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
+      {/* CHAT CENTRAL */}
+      <TouchableOpacity
+        accessibilityLabel="Abrir chat"
+        style={[styles.navChatContainer, { backgroundColor: c.accent }]}
+        onPress={() => router.push('/chat')}
+      >
+        <Ionicons name="chatbubbles" size={27} color={theme === 'light' ? '#fff' : '#0A172A'} />
+        <Text style={[styles.navChatText, { color: theme === 'light' ? '#fff' : '#0A172A' }]}>Chat</Text>
       </TouchableOpacity>
 
       {/* MENU LATERAL */}
@@ -87,8 +92,14 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
 
               <View style={[styles.divider, { borderColor: c.subtext }]} />
 
-              {['Chat', 'FAQ', t.perfil].map((label, i) => (
-                <TouchableOpacity key={i} style={styles.modalItem} onPress={() => { onMenuClose(); if (label === t.perfil) router.push('/perfil'); }}>
+              {['FAQ'].map((label, i) => (                <TouchableOpacity
+                  key={i}
+                  style={styles.modalItem}
+                  onPress={() => {
+                    onMenuClose();
+                    if (label === 'FAQ') router.push('/faq');
+                  }}
+                >
                   <Text style={[styles.modalText, { color: c.text }]}>{label}</Text>
                 </TouchableOpacity>
               ))}
@@ -111,11 +122,11 @@ const styles = StyleSheet.create({
   },
   navItem: { alignItems: 'center', width: 60 },
   navText: { fontSize: 12, marginTop: 4 },
-  navLogoContainer: {
+  navChatContainer: {
     position: 'absolute', left: '50%', bottom: 20, marginLeft: -35,
     width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center', elevation: 10,
   },
-  navLogo: { width: 65, height: 65 },
+  navChatText: { fontSize: 11, fontWeight: '700', marginTop: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
   modalView: { height: '100%', width: '75%', paddingTop: 60, paddingHorizontal: 20 },
   userInfoContainer: {

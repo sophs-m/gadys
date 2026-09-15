@@ -289,8 +289,7 @@ export default function Inicio() {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 40, paddingBottom: 10 }}>
             {ComidasTipicas(t).map((item, i) => (
-              <FoodCard key={i} {...item} onPress={() => router.push(`/comidas?open=${item.key}` as any)} />
-            ))}
+              <FoodCard key={i} title={item.title} image={item.image} onPress={() => router.push(`/comidas?open=${item.key}` as any)} />            ))}
             <TouchableOpacity style={styles.verTodosBtn} onPress={() => router.push('/comidas')}>
               <Text style={styles.verTodosText}>{t.verTodos}</Text>
               <Ionicons name="arrow-forward" size={20} color="#FFC107" />

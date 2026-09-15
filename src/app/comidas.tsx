@@ -39,13 +39,24 @@ const comidaImages: Record<ComidaKey, any> = {
 
 const comidaKeys: ComidaKey[] = Object.keys(comidaImages) as ComidaKey[];
 
+const localFoodsByState: Partial<Record<string, ComidaKey[]>> = {
+  AC: ['sopa'], AL: ['sururu'], AP: ['tacaca'], AM: ['tucupi', 'pirarucu'],
+  BA: ['acaraje', 'moqueca'], CE: ['baiao'], DF: ['mortadela'], ES: ['moqueca'],
+  GO: ['pamonha'], MA: ['arroz', 'caranguejada'], MT: ['maria'], MS: ['carneiro', 'terere'],
+  MG: ['paoqueijo', 'feijoada'], PA: ['pato', 'tacaca', 'tucupi'], PB: ['carnesol'],
+  PR: ['barreado'], PE: ['bolo', 'carnesol'], PI: ['pacoca'], RJ: ['feijoada'],
+  RN: ['ginga'], RS: ['churrasco', 'chimarrao'], RO: ['pirarucu'], RR: ['pacoca'],
+  SC: ['tainha'], SP: ['mortadela'], SE: ['caranguejada'], TO: ['chambari'],
+};
+
 export default function Comidas() {
   const router = useRouter();
   const { theme } = useSettings();
   const c = themes[theme];
   const t = translations.pt;
-  const { open } = useLocalSearchParams<{ open?: string }>();
+  const { open, state } = useLocalSearchParams<{ open?: string; state?: string }>();
   const [selected, setSelected] = useState<ComidaKey | null>(null);
+  const visibleFoodKeys = state && localFoodsByState[state] ? localFoodsByState[state] : comidaKeys;
 
   useEffect(() => {
     if (open && comidaKeys.includes(open as ComidaKey)) setSelected(open as ComidaKey);
@@ -57,12 +68,12 @@ export default function Comidas() {
         <TouchableOpacity onPress={() => router.push('/(tabs)/inicio')} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={c.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: c.text }]}>{t.comidas}</Text>
+        <Text style={[styles.headerTitle, { color: c.text }]}>{state ? 'Culinária local' : t.comidas}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.grid}>
-        {comidaKeys.map((key) => (
+        {visibleFoodKeys.map((key) => (
           <TouchableOpacity key={key} style={[styles.card, { backgroundColor: c.card }]} onPress={() => setSelected(key)}>
             <Image source={comidaImages[key]} style={styles.cardImage} />
             <View style={styles.cardContent}>

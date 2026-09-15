@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Dimensions, Image, Modal, SafeAreaView, ScrollView,
+  Dimensions, Image, Modal, ScrollView,
   StatusBar, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { themes, useSettings } from '../context/SettingsContext';
 
 const { width: W } = Dimensions.get('window');
