@@ -14,6 +14,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { comida, themes, useSettings } from '../context/SettingsContext';
 import { answerQuery, ChatChip, ChatState, createItinerary, findStateMatch, getWelcomeMessage, Itinerary, normalize } from '../data/chatKnowledge';
 
@@ -36,6 +37,7 @@ export default function Chat() {
   const t = comida;
   const c = themes[theme];
 
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -318,7 +320,7 @@ export default function Chat() {
         )}
 
         {/* INPUT */}
-        <View style={[styles.inputBar, { backgroundColor: c.card, borderTopColor: c.nav }]}>
+        <View style={[styles.inputBar, { backgroundColor: c.card, borderTopColor: c.nav, paddingBottom: insets.bottom > 0 ? insets.bottom : 10 }]}>
           <TextInput
             style={[styles.input, { color: c.text }]}
             placeholder={itineraryStep === 'destination' ? 'Digite o destino...' : itineraryStep === 'days' ? 'Quantos dias você terá?' : 'Pergunte ou crie um roteiro...'}

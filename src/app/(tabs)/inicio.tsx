@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import NavLayout from '../../components/NavLayout';
 import TimelineCard from '../../components/TimelineCard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { comida, themes, useSettings } from '../../context/SettingsContext';
 
 const HIST_KEY = 'historico_pesquisa';
@@ -137,6 +138,8 @@ export default function Inicio() {
   const { theme } = useSettings();
   const t = comida;
   const c = themes[theme];
+  const insets = useSafeAreaInsets();
+  const navPadding = 70 + insets.bottom;
   const [menuVisible, setMenuVisible] = useState(false);
   const [nomeUsuario, setNomeUsuario] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,7 +172,7 @@ export default function Inicio() {
 
   return (
     <NavLayout active="inicio" menuVisible={menuVisible} onMenuClose={() => setMenuVisible(false)}>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: navPadding }}>
 
         {/* HERO */}
         <View style={styles.hero}>

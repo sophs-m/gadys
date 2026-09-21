@@ -1,11 +1,9 @@
 import { useRouter } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
 
 const headerImage = require('../../../assets/images/estados/sp.png');
-const maspImage = require('../../../assets/images/sp/masp.png');
-const parqueImage = require('../../../assets/images/sp/parque.png');
 
 const COR = '#FFC700';
 
@@ -13,11 +11,11 @@ export default function SaoPaulo() {
   const router = useRouter();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -42,14 +40,10 @@ export default function SaoPaulo() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="SP" imagensLocais={{
-                'MASP': maspImage,
-                'Parque Ibirapuera': parqueImage,
-              }} />
+              <LocalList sigla="SP" />
             </View>
           }
         />
-      </ScrollView>
     </View>
   );
 }

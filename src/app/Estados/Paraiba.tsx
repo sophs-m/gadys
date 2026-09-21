@@ -1,135 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/pb.png');
-const centroHistoricoImage = require('../../../assets/images/pb/centro-historico.png');
-const saoJoaoImage = require('../../../assets/images/pb/sao-joao.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Festa de São João',
-        category: 'Evento',
-        location: 'Campina Grande',
-        description: 'O maior São João do Mundo, com forró, quadrilhas, comidas típicas e o famoso casamento caipira.',
-        modalDescription: `**Festa de São João**\n\n**Tradição, Cultura Popular e Herança Rural**\nA Festa de São João é uma das celebrações mais importantes do calendário cultural brasileiro, com raízes nas festas juninas trazidas de Portugal durante o período colonial. Com o tempo, ela foi incorporando elementos da cultura indígena e africana, ganhando características próprias em cada região do país.\n\nNo Nordeste, a festa se tornou um grande símbolo cultural ligado ao ciclo agrícola do milho e à vida rural. As comemorações incluem quadrilhas juninas, fogueiras, comidas típicas, forró e celebrações religiosas em homenagem a São João Batista. Mais do que uma festa religiosa, o São João representa a identidade cultural nordestina e a memória da vida no sertão.`,
-        image: saoJoaoImage,
-        rating: 5
-    },
-    {
-        name: 'Centro Histórico de João Pessoa',
-        category: 'Monumento',
-        location: 'João Pessoa',
-        description: 'Um dos mais importantes do Brasil, com um conjunto arquitetônico que inclui a Igreja de São Francisco e o Casarão dos Azulejos.',
-        modalDescription: `**Centro Histórico de João Pessoa**\n\n**Memória Colonial e Patrimônio Cultural**\nO Centro Histórico de João Pessoa, na Paraíba, é um dos mais antigos conjuntos urbanos do Brasil e reflete diferentes fases da ocupação colonial no Nordeste. A cidade, fundada no século XVI, foi originalmente chamada de Filipéia de Nossa Senhora das Neves e passou por períodos de domínio português e holandês.\n\nSua arquitetura preserva igrejas barrocas, praças e casarões que mostram a evolução urbana desde o período colonial. O centro histórico também está ligado à expansão da cana-de-açúcar e à organização administrativa da capitania da Paraíba.\n\nHoje, essa área é considerada um importante patrimônio cultural, representando a memória histórica do estado e sendo um dos principais símbolos da identidade paraibana.`,
-        image: centroHistoricoImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Paraiba() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -155,13 +41,10 @@ export default function Paraiba() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="PB" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="PB" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

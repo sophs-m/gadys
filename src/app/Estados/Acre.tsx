@@ -1,146 +1,20 @@
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
 
 const headerImage = require('../../../assets/images/estados/ac.png');
-const seringueiraImage = require('../../../assets/images/ac/seringueira.png');
-const mercadoVelhoImage = require('../../../assets/images/ac/mercado.png');
-const festivalDePraiaImage = require('../../../assets/images/ac/festival.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-  {
-    name: 'Festival de Praia',
-    category: 'Evento',
-    location: 'Rio Branco',
-    description: 'No Acre, quando o nível dos rios baixa durante o "verão amazônico" (julho a setembro), bancos de areia surgem, dando lugar a festivais com shows, esportes e gastronomia regional.',
-    modalDescription: `**A Festa de Praia do Acre**\n\n**Origem e Desenvolvimento (Século XX)**\nA Festa de Praia surgiu a partir do costume das comunidades acreanas de aproveitar as praias naturais que aparecem durante o período de estiagem dos rios amazônicos. Com a diminuição do nível das águas entre os meses de julho e setembro, extensas faixas de areia tornam-se espaços de lazer, convivência e celebração para a população local.\n\n**Transformação em Evento Cultural**\nAo longo dos anos, esses encontros informais evoluíram para grandes festivais organizados por prefeituras e comunidades. As festas passaram a incluir shows musicais, apresentações culturais, competições esportivas, concursos de beleza, feiras de artesanato e barracas com comidas típicas, atraindo visitantes de diversas regiões.\n\n**Valorização da Cultura Acreana**\nMais do que um evento recreativo, a Festa de Praia tornou-se uma importante manifestação cultural do Acre. Ela fortalece o turismo, movimenta a economia local e valoriza as tradições das populações ribeirinhas, destacando a importância dos rios para a história, a cultura e a identidade do povo acreano.`,
-    image: festivalDePraiaImage,
-    rating: 4,
-  },
-  {
-    name: 'Seringueiras',
-    category: 'Monumento',
-    location: 'Xapuri',
-    description: 'As seringueiras (Hevea brasiliensis) são as grandes protagonistas da história econômica, social e geográfica do Acre. Foi a busca pelo látex que desenhou as fronteiras do estado e atraiu as primeiras grandes levas de migrantes.',
-    modalDescription: `**As Seringueiras**\n\n**O Ciclo da Borracha (Século XIX e início do Século XX)**\nAs seringueiras (Hevea brasiliensis) desempenharam um papel fundamental na história do Acre. A partir da segunda metade do século XIX, a crescente demanda mundial por borracha impulsionou a extração do látex, atraindo milhares de trabalhadores para a região amazônica. A atividade seringalista promoveu o povoamento do território, movimentou a economia local e contribuiu diretamente para a consolidação da presença brasileira no Acre.\n\n**Importância Histórica e Econômica**\nAlém de impulsionar o desenvolvimento regional, as seringueiras tornaram-se um símbolo da identidade acreana. A riqueza gerada pela borracha influenciou a formação de cidades, o crescimento do comércio e os acontecimentos que culminaram na incorporação do Acre ao território brasileiro.`,
-    image: seringueiraImage,
-    rating: 5,
-  },
-  {
-    name: 'Mercado Velho',
-    category: 'Monumento',
-    location: 'Rio Branco',
-    description: 'Oficialmente chamado de Mercado Municipal Elpídio Ribeiro, é um dos principais pontos turísticos, culturais e gastronômicos da capital do Acre, Rio Branco. Localizado às margens do Rio Acre, ele carrega grande parte da identidade e da história do estado.',
-    modalDescription: `**Mercado Velho de Rio Branco**\n\n**Centro Comercial e Ponto de Encontro**\nLocalizado às margens do Rio Acre, o Mercado Velho foi um dos principais centros comerciais de Rio Branco durante o período de expansão econômica da borracha. O espaço reunia comerciantes, seringueiros e viajantes, funcionando como importante local de troca de mercadorias e circulação de produtos regionais.\n\n**Patrimônio Histórico do Acre**\nAo longo dos anos, o Mercado Velho consolidou-se como um dos mais importantes patrimônios históricos e culturais da capital acreana. Atualmente, o local preserva a memória do desenvolvimento econômico e social do estado, sendo um símbolo das tradições, da arquitetura e da história de Rio Branco.`,
-    image: mercadoVelhoImage,
-    rating: 4,
-  },
- 
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Acre() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -168,17 +42,10 @@ export default function Acre() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="AC" imagensLocais={{
-              'Seringueiras': seringueiraImage,
-              'Mercado Velho': mercadoVelhoImage,
-              'Festival de Praia': festivalDePraiaImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="AC" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

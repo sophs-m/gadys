@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/pe.png');
-const recifeAntigoImage = require('../../../assets/images/pe/recife-antigo.png');
-const olindaImage = require('../../../assets/images/pe/olinda.png');
-const frevoImage = require('../../../assets/images/pe/frevo.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Frevo',
-        category: 'Evento',
-        location: 'Pernambuco',
-        description: 'Dança e ritmo musical eletrizante, com seus passistas e sombrinhas coloridas, que agita o carnaval de Pernambuco.',
-        modalDescription: `**Frevo**\n\n**Energia, Resistência e Identidade Pernambucana**\nO frevo surgiu em Pernambuco no final do século XIX e início do século XX, principalmente nas ruas do Recife durante o período do carnaval. Ele nasceu da mistura de marchas militares, polcas e elementos da música popular, acelerados ao extremo pelas fanfarras das ruas.\n\nA dança do frevo, marcada por movimentos rápidos e acrobáticos com o uso de sombrinhas coloridas, se desenvolveu como expressão popular ligada às classes trabalhadoras e aos antigos blocos carnavalescos. Com o tempo, tornou-se símbolo da identidade pernambucana e uma das mais importantes manifestações culturais do Brasil.`,
-        image: frevoImage,
-        rating: 5
-    },
-    {
-        name: 'Recife Antigo',
-        category: 'Monumento',
-        location: 'Recife',
-        description: 'Bairro histórico com ruas de paralelepípedos, casarões coloridos e a Embaixada dos Bonecos Gigantes.',
-        modalDescription: `**Recife Antigo**\n\n**Porto Colonial e Centro Histórico do Nordeste**\nO Recife Antigo é a área onde a cidade de Recife começou a se desenvolver, ainda no período colonial, por volta do século XVI. Sua localização estratégica, entre rios e o mar, transformou a região em um importante porto para o escoamento do açúcar produzido em Pernambuco.\n\nDurante a ocupação holandesa no século XVII, o Recife ganhou grande importância administrativa e urbanística, especialmente sob o governo de Maurício de Nassau, quando foram construídas pontes, canais e melhorias urbanas.\n\nHoje, o Recife Antigo preserva parte dessa história em seus casarões, ruas históricas e espaços culturais, sendo um dos principais centros turísticos e culturais de Pernambuco.`,
-        image: recifeAntigoImage,
-        rating: 5
-    },
-    {
-        name: 'Olinda',
-        category: 'Monumento',
-        location: 'Olinda',
-        description: 'Cidade Patrimônio da UNESCO, com suas ladeiras, igrejas barrocas e uma vista deslumbrante do mar.',
-        modalDescription: `**Olinda**\n\n**Patrimônio Barroco e Formação da Capitania de Pernambuco**\nA cidade de Olinda foi fundada em 1535 e rapidamente se tornou um dos centros mais ricos do Brasil colonial, impulsionada pelo ciclo da cana-de-açúcar. Sua posição estratégica no litoral pernambucano favoreceu o comércio e a administração da capitania.\n\nDurante a invasão holandesa no século XVII, Olinda foi parcialmente destruída, e Recife passou a ganhar maior importância econômica e política. Mesmo assim, Olinda manteve seu valor religioso e cultural, preservando igrejas barrocas, conventos e um conjunto arquitetônico colonial único.\n\nAtualmente, Olinda é reconhecida como Patrimônio Cultural da Humanidade e é famosa por seu carnaval de rua, marcado por blocos, bonecos gigantes e forte participação popular.`,
-        image: olindaImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Pernambuco() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Pernambuco() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="PE" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="PE" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

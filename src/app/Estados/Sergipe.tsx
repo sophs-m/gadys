@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/se.png');
-const canionDoXingoImage = require('../../../assets/images/se/canion.png');
-const festaDoMastroImage = require('../../../assets/images/se/festa-do-mastro.png');
-const praiaDeAtalaiaImage = require('../../../assets/images/se/praca.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Festa do Mastro',
-        category: 'Evento',
-        location: 'Capela',
-        description: 'Uma festa que une o sagrado e o profano, com a queima do mastro e a “sarandaia” pelas ruas da cidade.',
-        modalDescription: `**Festa do Mastro**\n\n**Tradição Popular e Identidade Sergipana**\nA Festa do Mastro é uma manifestação cultural tradicional de Sergipe, especialmente conhecida na cidade de Capela. Sua origem está ligada às celebrações religiosas e às antigas práticas comunitárias do interior nordestino, que misturam fé, festa e organização popular.\n\nO evento gira em torno do corte e transporte de um grande mastro de madeira, que simboliza devoção e união da comunidade. Ao longo do tempo, a festa incorporou elementos profanos, como música, dança e celebrações de rua, tornando-se uma das expressões mais importantes da cultura popular sergipana.`,
-        image: festaDoMastroImage,
-        rating: 5
-    },
-    {
-        name: 'Cânion do Xingó',
-        category: 'Outro',
-        location: 'Canindé de São Francisco',
-        description: 'Um vale profundo e estreito, com paredões de arenito de até 50 metros de altura, formado pelo represamento do Rio São Francisco.',
-        modalDescription: `**Cânion de Xingó**\n\n**História Geológica e Cultura do Sertão do São Francisco**\nO Cânion de Xingó, localizado na divisa entre Sergipe e Alagoas, é uma impressionante formação rochosa esculpida ao longo de milhões de anos pela ação do rio São Francisco. Antes da construção da Usina de Xingó, a região era marcada por corredeiras e paisagens naturais do sertão semiárido.\n\nHistoricamente, o entorno do cânion foi ocupado por comunidades ribeirinhas que viviam da pesca e da agricultura de subsistência. Com a formação do reservatório da usina, a área passou a ter também importância turística e energética.\n\nHoje, o Cânion de Xingó é um dos principais destinos de ecoturismo do Nordeste, reunindo natureza, história geológica e cultura sertaneja.`,
-        image: canionDoXingoImage,
-        rating: 5
-    },
-    {
-        name: 'Praça São Francisco',
-        category: 'Monumento',
-        location: 'São Cristóvão',
-        description: 'A praça é um testemunho único do período em que as coroas de Portugal e Espanha estavam unidas, entre 1580 e 1640.',
-        modalDescription: `**Praça São Francisco**\n\n**Patrimônio Histórico e Memória Colonial**\nA Praça São Francisco, localizada em São Cristóvão (Sergipe), é um dos mais importantes conjuntos arquitetônicos coloniais do Brasil. Sua origem remonta ao período da colonização portuguesa, quando a cidade foi uma das primeiras capitais da capitania de Sergipe.\n\nA praça é cercada por edifícios históricos, como igrejas e antigos casarões, que refletem a organização urbana do período colonial. Seu conjunto arquitetônico preserva características do barroco e da influência religiosa na formação das cidades brasileiras.\n\nAtualmente, a Praça São Francisco é reconhecida como Patrimônio Cultural da Humanidade, sendo um dos principais símbolos da história e da identidade sergipana.`,
-        image: praiaDeAtalaiaImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Sergipe() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Sergipe() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="SE" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="SE" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

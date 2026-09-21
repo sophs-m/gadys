@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/pr.png');
-const cataratasImage = require('../../../assets/images/pr/cataratas.png');
-const jardimBotanicoImage = require('../../../assets/images/pr/jardim.png');
-const fandangoImage = require('../../../assets/images/pr/fandango.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Fandango Caiçara',
-        category: 'Evento',
-        location: 'Litoral do Paraná',
-        description: 'Uma expressão cultural dos povos caiçaras, com música, dança e sapateado.',
-        modalDescription: `**Fandango Caiçara**\n\n**Tradição Litorânea e Cultura de Resistência**\nO Fandango Caiçara é uma manifestação cultural tradicional das comunidades caiçaras do litoral do Paraná e do litoral sul de São Paulo. Sua origem está ligada à formação dessas populações, resultantes da mistura entre indígenas, portugueses e africanos, que desenvolveram um modo de vida baseado na pesca artesanal, agricultura de subsistência e forte relação com o mar.\n\nHistoricamente, o fandango surge como uma forma de celebração comunitária, com música, dança e versos improvisados, tocados com instrumentos como a rabeca e a viola. Além de entretenimento, ele também funciona como espaço de transmissão de conhecimentos e fortalecimento da identidade caiçara, sendo reconhecido como patrimônio cultural brasileiro.`,
-        image: fandangoImage,
-        rating: 4
-    },
-    {
-        name: 'Cataratas do Iguaçu',
-        category: 'Outro',
-        location: 'Foz do Iguaçu',
-        description: "Um conjunto de 275 quedas d'água, consideradas uma das Sete Maravilhas Naturais do Mundo.",
-        modalDescription: `**Cataratas do Iguaçu**\n\n**Formação Natural e Patrimônio Mundial**\nAs Cataratas do Iguaçu, localizadas no oeste do Paraná, na fronteira com a Argentina, são uma das maiores e mais impressionantes quedas d'água do mundo. Sua formação geológica ocorreu há milhões de anos, a partir de processos erosivos que moldaram o rio Iguaçu e criaram o conjunto de mais de 270 quedas.\n\nAntes da colonização europeia, a região já era habitada por povos indígenas Guarani, que consideravam as cataratas um espaço sagrado. Com a chegada dos colonizadores, a área passou a ser explorada e posteriormente preservada.\n\nHoje, as cataratas são reconhecidas como Patrimônio Natural da Humanidade e desempenham papel fundamental no turismo, na conservação ambiental e na identidade do estado do Paraná.`,
-        image: cataratasImage,
-        rating: 5
-    },
-    {
-        name: 'Jardim Botânico de Curitiba',
-        category: 'Monumento',
-        location: 'Curitiba',
-        description: 'Um dos cartões-postais de Curitiba, com sua estufa de vidro inspirada no Palácio de Cristal de Londres.',
-        modalDescription: `**Jardim Botânico de Curitiba**\n\n**Urbanismo, Natureza e Identidade Paranaense**\nO Jardim Botânico de Curitiba, inaugurado em 1991, tornou-se um dos principais símbolos da capital paranaense. Inspirado em jardins europeus, ele foi criado como parte do projeto de valorização ambiental e urbanística da cidade de Curitiba, que se destacou ao longo do século XX por seu planejamento urbano inovador.\n\nO espaço abriga estufas, jardins geométricos e áreas de preservação da Mata Atlântica, além de ser um importante centro de pesquisa e educação ambiental. Ele reflete a identidade de Curitiba como uma cidade que busca integrar natureza e urbanização de forma equilibrada.`,
-        image: jardimBotanicoImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Parana() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Parana() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="PR" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="PR" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

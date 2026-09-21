@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/mt.png');
-const pantanalImage = require('../../../assets/images/mt/pantanal.png');
-const chapadaImage = require('../../../assets/images/mt/chapada.png');
-const siririImage = require('../../../assets/images/mt/siriri.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Siriri e Cururu',
-        category: 'Evento',
-        location: 'Mato Grosso',
-        description: 'Danças típicas que animam as festas do estado, com música, palmas e sapateado.',
-        modalDescription: `**Siriri e Cururu**\n\n**Contexto Histórico e Influência Cultural**\nO siriri e o cururu surgem no interior do Centro-Oeste brasileiro, especialmente em Mato Grosso, como resultado da mistura entre culturas indígenas locais, influências africanas trazidas pelo período colonial e elementos da tradição portuguesa. O cururu, mais antigo, nasceu em ambientes rurais e religiosos, ligado a encontros em que violeiros improvisavam versos com temas bíblicos, sociais ou do cotidiano. Já o siriri se desenvolveu como expressão mais festiva, associada a danças comunitárias e celebrações populares.\n\nEssas manifestações tiveram papel importante na preservação da identidade cultural das comunidades ribeirinhas e do interior, funcionando como forma de transmissão oral de histórias, crenças e valores.`,
-        image: siririImage,
-        rating: 4
-    },
-    {
-        name: 'Pantanal Norte',
-        category: 'Outro',
-        location: 'Poconé',
-        description: 'A maior planície inundável do mundo, com uma biodiversidade impressionante e o melhor lugar para observar onças-pintadas.',
-        modalDescription: `**Pantanal Norte**\n\n**Contexto Histórico e Influência**\nO Pantanal Norte sempre foi uma região de ocupação humana ligada à adaptação ao ambiente natural. Povos indígenas já utilizavam seus recursos antes da colonização, aproveitando o ciclo das cheias para pesca e deslocamento. Durante o período colonial, a região passou a ser ocupada de forma mais intensa com a expansão da pecuária, que se adaptou bem às áreas alagáveis.\n\nAo longo do tempo, o Pantanal influenciou diretamente o modo de vida pantaneiro, marcado pela figura do peão, pelas grandes fazendas e pela relação equilibrada com o ciclo das águas. Hoje, além de sua importância histórica na ocupação do interior do Brasil, o Pantanal Norte é essencial para a conservação ambiental e para o turismo ecológico.`,
-        image: pantanalImage,
-        rating: 5
-    },
-    {
-        name: 'Chapada dos Guimarães',
-        category: 'Outro',
-        location: 'Chapada dos Guimarães',
-        description: 'Cachoeiras, cânions e formações rochosas de tirar o fôlego, como a famosa cachoeira Véu de Noiva.',
-        modalDescription: `**Chapada dos Guimarães**\n\n**Contexto Histórico e Influência**\nA Chapada dos Guimarães possui importância histórica ligada à ocupação do interior de Mato Grosso durante os ciclos de exploração e expansão territorial. No período colonial, a região serviu como área de passagem e observação estratégica devido à sua localização elevada no Cerrado.\n\nCom o tempo, a chapada passou a influenciar a cultura e o imaginário regional, sendo associada a paisagens naturais imponentes, quedas d'água e formações rochosas que marcaram a identidade do estado. Hoje, sua principal influência está no turismo ecológico e na preservação ambiental, sendo uma das áreas mais importantes para o estudo e conservação do Cerrado brasileiro.`,
-        image: chapadaImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function MatoGrosso() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function MatoGrosso() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="MT" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="MT" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

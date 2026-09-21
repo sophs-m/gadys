@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/es.png');
-const conventoDaPenhaImage = require('../../../assets/images/es/convento.png');
-const praiasDeGuarapariImage = require('../../../assets/images/es/praias.png');
-const festaDaPolentaImage = require('../../../assets/images/es/festa.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Festa da Polenta',
-        category: 'Evento',
-        location: 'Venda Nova do Imigrante',
-        description: 'Celebra a cultura italiana com muita comida, música e o tradicional tombo da polenta gigante.',
-        modalDescription: `**Festa da Polenta**\n\n**A Herança da Imigração Italiana no Espírito Santo**\nA Festa da Polenta surgiu como forma de preservar os costumes trazidos pelos imigrantes italianos que chegaram ao estado a partir da segunda metade do século XIX. Muitos desses imigrantes estabeleceram-se na região serrana capixaba, especialmente em Venda Nova do Imigrante, onde desenvolveram atividades agrícolas e mantiveram vivas suas tradições culturais.\n\nCriada em 1979, a festa nasceu para celebrar a história, a culinária e os costumes das famílias descendentes de italianos. Um dos momentos mais conhecidos é o "Tombo da Polenta", quando uma enorme quantidade de polenta é preparada e servida ao público.\n\n**Influência Cultural e Econômica**\nAo longo das décadas, a Festa da Polenta transformou-se em um dos maiores eventos culturais do Espírito Santo. Além de valorizar a memória da imigração italiana, promove danças folclóricas, apresentações musicais, gastronomia típica e fortalece o turismo regional.`,
-        image: festaDaPolentaImage,
-        rating: 4
-    },
-    {
-        name: 'Convento da Penha',
-        category: 'Monumento',
-        location: 'Vila Velha',
-        description: 'Principal monumento histórico e religioso do estado, com uma vista panorâmica de Vitória e Vila Velha.',
-        modalDescription: `**Convento da Penha**\n\n**Um dos Santuários Mais Antigos do Brasil**\nO Convento da Penha é um dos mais importantes patrimônios históricos e religiosos do Espírito Santo. Localizado em Vila Velha, sua história começou em 1558, quando o frei franciscano Frei Pedro Palácios chegou à região trazendo uma imagem de Nossa Senhora das Alegrias.\n\nInicialmente, foi construída uma pequena capela no alto de um penhasco com vista para o litoral. Com o aumento da devoção popular, o local foi ampliado ao longo dos séculos, tornando-se um dos principais centros de peregrinação religiosa do país.\n\n**Importância Histórica e Cultural**\nAlém de sua relevância religiosa, o Convento da Penha acompanhou grande parte da história do Espírito Santo desde o período colonial. Atualmente, recebe milhares de visitantes e peregrinos todos os anos, especialmente durante a tradicional Festa da Penha.`,
-        image: conventoDaPenhaImage,
-        rating: 5
-    },
-    {
-        name: 'Praias de Guarapari',
-        category: 'Monumento',
-        location: 'Guarapari',
-        description: 'Famosas por suas areias monazíticas, com propriedades terapêuticas, e pela beleza de suas praias.',
-        modalDescription: `**Praias de Guarapari**\n\n**Da Ocupação Indígena ao Desenvolvimento Turístico**\nA região onde hoje se localiza Guarapari era habitada por povos indígenas muito antes da chegada dos colonizadores portugueses. A cidade começou a se desenvolver durante o período colonial, inicialmente ligada à pesca, à agricultura e ao comércio costeiro.\n\nAo longo do século XX, Guarapari ganhou destaque nacional devido à beleza de suas praias e à presença das chamadas areias monazíticas, ricas em minerais radioativos. A partir das décadas de 1950 e 1960, a cidade passou a receber um número crescente de turistas.\n\n**Influência no Espírito Santo**\nHoje, Guarapari é um dos principais destinos turísticos do Sudeste brasileiro. O turismo impulsiona a economia local e contribui para a divulgação da cultura e das belezas naturais capixabas.`,
-        image: praiasDeGuarapariImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function EspiritoSanto() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,16 +41,10 @@ export default function EspiritoSanto() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="ES" imagensLocais={{
-              'Pedra Azul': conventoDaPenhaImage,
-              'Guarapari': praiasDeGuarapariImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="ES" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

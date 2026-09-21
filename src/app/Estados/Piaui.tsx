@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/pi.png');
-const serraDaCapivaraImage = require('../../../assets/images/pi/serra-da-capivara.png');
-const deltaDoParnaibaImage = require('../../../assets/images/pi/delta-do-parnaiba.png');
-const batalhaDoJenipapoImage = require('../../../assets/images/pi/batalha-do-jenipapo.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Batalha do Jenipapo',
-        category: 'Evento',
-        location: 'Campo Maior',
-        description: 'Enfrentamento sangrento decisivo para a independência do Brasil, hoje celebrado com encenações e festas.',
-        modalDescription: `**Batalha do Jenipapo**\n\n**Independência e Resistência no Piauí**\nA Batalha do Jenipapo, ocorrida em 1823 às margens do rio Jenipapo, no Piauí, foi um dos episódios mais importantes do processo de independência do Brasil no Norte e Nordeste. Mesmo após a proclamação da independência em 1822, tropas portuguesas ainda resistiam em algumas regiões do país.\n\nNo Piauí, civis, sertanejos e poucos soldados locais enfrentaram forças militares portuguesas muito mais bem armadas. A luta foi extremamente desigual e resultou em muitas perdas para os piauienses, mas teve grande importância simbólica: ajudou a consolidar a expulsão dos portugueses e a garantir a adesão da província ao Brasil independente.`,
-        image: batalhaDoJenipapoImage,
-        rating: 4
-    },
-    {
-        name: 'Serra da Capivara',
-        category: 'Monumento',
-        location: 'São Raimundo Nonato',
-        description: 'Parque nacional com a maior concentração de arte rupestre do mundo, um mergulho na pré-história.',
-        modalDescription: `**Serra da Capivara**\n\n**Berço da História Humana nas Américas**\nA Serra da Capivara, localizada no sudeste do Piauí, é um dos mais importantes sítios arqueológicos do mundo. A região abriga milhares de pinturas rupestres em paredões de pedra, além de vestígios de antigas ocupações humanas.\n\nEstudos arqueológicos indicam que a área pode ter sido habitada há dezenas de milhares de anos, o que coloca a Serra da Capivara no centro de debates sobre a chegada dos primeiros humanos às Américas.\n\nAlém de sua importância científica, o parque também é fundamental para a preservação ambiental e cultural, sendo reconhecido como Patrimônio Mundial pela UNESCO.`,
-        image: serraDaCapivaraImage,
-        rating: 5
-    },
-    {
-        name: 'Delta do Parnaíba',
-        category: 'Monumento',
-        location: 'Parnaíba',
-        description: 'O único delta das Américas que deságua em mar aberto, um labirinto de ilhas, dunas e mangues.',
-        modalDescription: `**Delta do Parnaíba**\n\n**Encontro de Águas e Biodiversidade Única**\nO Delta do Parnaíba, localizado entre os estados do Piauí e Maranhão, é o único delta em mar aberto das Américas. Formado pelo rio Parnaíba, ele se divide em vários braços antes de desaguar no Oceano Atlântico, criando ilhas, manguezais e canais.\n\nA região possui grande importância ecológica, abrigando rica biodiversidade, incluindo aves migratórias, peixes e espécies típicas de manguezal. Historicamente, o delta também foi utilizado como rota de navegação e pesca pelas populações locais.\n\nHoje, o Delta do Parnaíba é um importante destino de ecoturismo, destacando-se pela beleza natural e pela preservação dos ecossistemas costeiros.`,
-        image: deltaDoParnaibaImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Piaui() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Piaui() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="PI" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="PI" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

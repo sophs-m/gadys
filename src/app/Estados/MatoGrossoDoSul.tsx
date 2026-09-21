@@ -1,135 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/ms.png');
-const bonitoImage = require('../../../assets/images/ms/bonito.png');
-const pantanalImage = require('../../../assets/images/ms/pantanal.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Bonito',
-        category: 'Outro',
-        location: 'Bonito',
-        description: 'Capital do ecoturismo brasileiro, com rios de águas cristalinas, grutas e a maior diversidade de peixes de água doce do mundo.',
-        modalDescription: `**Bonito**\n\n**Ecoturismo, Águas Cristalinas e Conservação Ambiental**\nO município de Bonito, em Mato Grosso do Sul, ganhou destaque a partir do século XX, quando atividades de turismo ecológico começaram a se desenvolver de forma organizada. A região, antes baseada na agropecuária e em pequenas propriedades rurais, passou a ser reconhecida por suas águas extremamente cristalinas, cavernas e rios de grande visibilidade.\n\nA principal influência histórica de Bonito está na mudança de uso do território: de área rural tradicional para referência mundial em ecoturismo sustentável. Isso ocorreu principalmente a partir das décadas finais do século XX, quando foram criadas normas rígidas de preservação ambiental.\n\nHoje, Bonito é um dos maiores símbolos do turismo ambiental do Brasil, com rios, grutas e cachoeiras que se tornaram referência internacional em conservação.`,
-        image: bonitoImage,
-        rating: 5
-    },
-    {
-        name: 'Pantanal Sul',
-        category: 'Outro',
-        location: 'Corumbá',
-        description: 'A porção sul do Pantanal, com fazendas históricas, aves raras e uma natureza exuberante acessível pela Estrada Parque.',
-        modalDescription: `**Pantanal Sul**\n\n**História, Ocupação e Cultura Pantaneira**\nO Pantanal Sul, localizado principalmente em Mato Grosso do Sul, possui uma história marcada pela ocupação ligada à pecuária extensiva. Desde o período colonial, a região foi utilizada para criação de gado em grandes fazendas, aproveitando as áreas alagáveis durante as cheias sazonais.\n\nAntes disso, povos indígenas já habitavam a região e conheciam profundamente o ciclo das águas. Com o avanço da colonização, essa relação com o ambiente foi incorporada ao modo de vida pantaneiro.\n\nA influência mais marcante do Pantanal Sul está na formação da cultura pantaneira, baseada na vida rural, na figura do peão e no uso tradicional da terra. Além disso, a região tornou-se um dos maiores patrimônios naturais do mundo, sendo fundamental para a biodiversidade e para o equilíbrio hídrico da América do Sul.`,
-        image: pantanalImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function MatoGrossoDoSul() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -155,13 +41,10 @@ export default function MatoGrossoDoSul() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="MS" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="MS" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

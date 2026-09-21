@@ -45,9 +45,14 @@ export default function AbasSwipe({ cor, historia, culturaLocal }: Props) {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScroll}
         scrollEventThrottle={16}
+        style={{ flex: 1 }}
       >
-        <View style={{ width: W }}>{historia}</View>
-        <View style={{ width: W }}>{culturaLocal}</View>
+        <ScrollView style={{ width: W }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+          {historia}
+        </ScrollView>
+        <ScrollView style={{ width: W }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+          {culturaLocal}
+        </ScrollView>
       </ScrollView>
     </View>
   );

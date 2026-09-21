@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/maa.png');
-const lencoisImage = require('../../../assets/images/estados/ma.png');
-const centroHistoricoImage = require('../../../assets/images/ma/centro.png');
-const bumbaMeuBoiImage = require('../../../assets/images/ma/bumba.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Bumba Meu Boi',
-        category: 'Evento',
-        location: 'Maranhão',
-        description: 'A maior festa popular do estado, uma mistura de teatro, dança e música que celebra a lenda do boi.',
-        modalDescription: `**Bumba Meu Boi**\n\n**A Maior Expressão Cultural do Maranhão**\nO Bumba Meu Boi é uma das manifestações folclóricas mais importantes do Brasil e o principal símbolo cultural do Maranhão. Sua origem remonta ao período colonial, entre os séculos XVIII e XIX, quando elementos das culturas indígena, africana e europeia se misturaram para criar uma celebração única. A história gira em torno da lenda de Pai Francisco e Catirina, combinando humor, crítica social e religiosidade popular.\n\nAo longo do tempo, o Bumba Meu Boi deixou de ser apenas uma encenação teatral para se tornar uma grande manifestação comunitária. Diferentes grupos, conhecidos como \'sotaques\', desenvolveram estilos próprios de música, dança, figurinos e instrumentos. Em 2019, a manifestação foi reconhecida pela UNESCO, consolidando sua importância para a cultura brasileira e mundial.`,
-        image: bumbaMeuBoiImage,
-        rating: 5
-    },
-    {
-        name: 'Lençóis Maranhenses',
-        category: 'Monumento',
-        location: 'Barreirinhas',
-        description: 'Um deserto de dunas brancas que se enchem de lagoas de água doce na estação das chuvas, um cenário único no mundo.',
-        modalDescription: `**Lençóis Maranhenses**\n\n**Uma Paisagem Moldada ao Longo de Milhares de Anos**\nOs Lençóis Maranhenses constituem um dos cenários naturais mais impressionantes do Brasil. O conjunto de dunas brancas começou a se formar ao longo de milhares de anos por meio da ação dos ventos, das correntes marítimas e do transporte de sedimentos trazidos pelos rios da região.\n\nDurante o período chuvoso, a água da chuva acumula-se entre as dunas, formando lagoas cristalinas que podem permanecer cheias por vários meses. Esse fenômeno cria uma paisagem rara no mundo.\n\nEm 1981 foi criado o Parque Nacional dos Lençóis Maranhenses para proteger esse patrimônio ambiental. Atualmente, os Lençóis Maranhenses são um dos destinos turísticos mais visitados do Brasil.`,
-        image: lencoisImage,
-        rating: 5
-    },
-    {
-        name: 'Centro Histórico de São Luís',
-        category: 'Monumento',
-        location: 'São Luís',
-        description: 'Patrimônio da UNESCO, com seus casarões revestidos de azulejos portugueses, um charme colonial inigualável.',
-        modalDescription: `**Centro Histórico de São Luís**\n\n**Uma Herança da Colonização Francesa e Portuguesa**\nO Centro Histórico de São Luís guarda parte fundamental da história da ocupação do norte do Brasil. A cidade foi fundada pelos franceses em 1612, tornando-se a única capital brasileira criada por esse povo europeu. Poucos anos depois, a região foi conquistada pelos portugueses, que consolidaram sua presença e transformaram São Luís em um importante centro administrativo e comercial da colônia.\n\nDurante os séculos XVIII e XIX, a economia maranhense prosperou com a produção e exportação de algodão e arroz. Uma das marcas mais conhecidas do centro histórico são os revestimentos de azulejos portugueses que cobrem as fachadas de muitos prédios.\n\nCom mais de três mil edificações históricas preservadas, o Centro Histórico de São Luís é considerado um dos maiores conjuntos arquitetônicos coloniais da América Latina. Em 1997, foi reconhecido pela UNESCO.`,
-        image: centroHistoricoImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Maranhao() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Maranhao() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="MA" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="MA" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

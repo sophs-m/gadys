@@ -1,140 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/rs.png');
-const revolucaoFarroupilhaImage = require('../../../assets/images/rs/canion.png');
-const serraImage = require('../../../assets/images/rs/serra.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Cânion Itaimbezinho',
-        category: 'Monumento',
-        location: 'Rio Grande do Sul',
-        description: ' É uma das mais impressionantes formações geológicas do Brasil. O cânion é conhecido por suas majestosas paredes rochosas e é um dos principais atrativos do Parque Nacional Aparados da Serra, que também é um símbolo do turismo sustentável e da conservação ambiental.',
-        modalDescription: `**Cânion Itaimbezinho**\n\n**Formação Geológica e Patrimônio Natural do Sul**\nO Cânion Itaimbezinho, localizado na divisa entre Rio Grande do Sul e Santa Catarina, é uma das formações geológicas mais impressionantes do Brasil. Ele foi esculpido ao longo de milhões de anos pela ação da erosão sobre rochas basálticas de antigas atividades vulcânicas.\n\nHistoricamente, a região era ocupada por povos indígenas como Kaingang e Xokleng, que conheciam profundamente os caminhos e recursos naturais dos campos de altitude. Com a colonização, o acesso à área permaneceu difícil por muito tempo, o que ajudou a preservar sua paisagem praticamente intocada.\n\nHoje, o Itaimbezinho é símbolo do ecoturismo e da preservação ambiental no sul do Brasil, sendo um dos cânions mais visitados do país.`,
-        image: revolucaoFarroupilhaImage,
-        rating: 4
-    },
-
-    {
-      name: 'Serra Gaúcha',
-      category: 'Outro',
-      location: 'Rio Grande do Sul',
-      description: 'É um acidente geográfico localizado no nordeste do Rio Grande do Sul. A região é marcada por montanhas, vales e uma rica biodiversidade. ',
-      modalDescription: `**Serra Gaúcha**\n\n** Imigração, Cultura Europeia e Desenvolvimento Regional**\nA Serra Gaúcha, no nordeste do Rio Grande do Sul, tem sua história marcada pela imigração europeia, especialmente a partir do século XIX. Italianos, alemães e outros grupos chegaram à região e se estabeleceram em pequenas propriedades rurais, dando início a um modelo de colonização baseado na agricultura familiar.
-
-Esse processo transformou profundamente a economia e a cultura local, influenciando a arquitetura, a culinária, os idiomas e as tradições festivas da região. Cidades como Gramado, Canela e Caxias do Sul se desenvolveram a partir dessas colônias, tornando-se importantes polos industriais e turísticos.
-
-Atualmente, a Serra Gaúcha é um dos principais destinos turísticos do Brasil, conhecida pelo clima europeu, pela produção de vinhos e pelo forte setor industrial e de serviços.`,
-      image: serraImage,
-      rating: 4
-  },
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function RioGrandeDoSul() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -160,13 +41,10 @@ export default function RioGrandeDoSul() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="RS" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="RS" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { comida } from '../context/SettingsContext';
 import { getFavoritos, getLocaisPorEstado, Local, toggleFavorito } from '../services/locais';
+import { localImageMap } from '../data/localImageMap';
+import { localDetails } from '../data/localDetails';
+import { getStaticLocais } from '../data/localStaticData';
 
 const BASE_URL = 'https://gadys-tcc.vercel.app';
 const toUrl = (path: string) => path.startsWith('http') ? path : BASE_URL + path;
@@ -11,12 +14,10 @@ const { width: W } = Dimensions.get('window');
 
 interface Props {
   sigla: string;
-  imagensLocais?: Record<string, any>;
 }
 
-function LocalModal({ local, imagem, visible, onClose, isFav, onFavorito }: {
+function LocalModal({ local, visible, onClose, isFav, onFavorito }: {
   local: Local | null;
-  imagem?: any;
   visible: boolean;
   onClose: () => void;
   isFav: boolean;
@@ -29,9 +30,10 @@ function LocalModal({ local, imagem, visible, onClose, isFav, onFavorito }: {
 
   const info = local.informacoesAdicionais ? (() => { try { return JSON.parse(local.informacoesAdicionais!); } catch { return null; } })() : null;
   const galleryUrls: string[] = info?.galleryImages?.map((g: any) => g.src ?? g) ?? [];
-  const carouselUrls: string[] = info?.carouselImages ?? (galleryUrls.length > 0 ? galleryUrls : (local.imagemUrl ? local.imagemUrl.split(',').map((u: string) => u.trim()).filter(Boolean) : []));
+  const fallbackUrl = local.imagemUrl || localImageMap[local.nome] || null;
+  const carouselUrls: string[] = info?.carouselImages ?? (galleryUrls.length > 0 ? galleryUrls : (fallbackUrl ? fallbackUrl.split(',').map((u: string) => u.trim()).filter(Boolean) : []));
   const images = carouselUrls.map(u => ({ uri: toUrl(u) }));
-  const mainImage = imagem ?? (images.length > 0 ? images[0] : null);
+  const mainImage = images.length > 0 ? images[0] : null;
 
   const goTo = (i: number) => {
     setPhotoIndex(i);
@@ -74,7 +76,7 @@ function LocalModal({ local, imagem, visible, onClose, isFav, onFavorito }: {
             <Ionicons name="close" size={20} color="#fff" />
           </TouchableOpacity>
 
-          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
             <View style={styles.modalTitleRow}>
               <Text style={styles.modalTitle}>{local.nome}</Text>
               <TouchableOpacity onPress={onFavorito}>
@@ -86,6 +88,21 @@ function LocalModal({ local, imagem, visible, onClose, isFav, onFavorito }: {
             {local.horarioFuncionamento ? <View style={styles.modalRow}><Ionicons name="time-outline" size={14} color="#FFC700" /><Text style={styles.modalMeta}> {local.horarioFuncionamento}</Text></View> : null}
             {local.preco ? <View style={styles.modalRow}><Ionicons name="cash-outline" size={14} color="#FFC700" /><Text style={styles.modalMeta}> {local.preco}</Text></View> : null}
             <Text style={styles.modalDesc}>{local.descricao}</Text>
+            {localDetails[local.nome]?.secoes.map((secao, i) => (
+              <View key={i} style={styles.secao}>
+                <Text style={styles.secaoTitulo}>{secao.titulo}</Text>
+                <Text style={styles.secaoTexto}>{secao.texto}</Text>
+                {secao.lista?.map((item, j) => (
+                  <Text key={j} style={styles.secaoItem}>• {item}</Text>
+                ))}
+                {secao.subsecoes?.map((sub, j) => (
+                  <View key={j} style={styles.subsecao}>
+                    <Text style={styles.subsecaoTitulo}>{sub.titulo}</Text>
+                    <Text style={styles.subsecaoTexto}>{sub.texto}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
           </ScrollView>
 
           <TouchableOpacity style={styles.modalBtn} onPress={onClose}>
@@ -97,21 +114,34 @@ function LocalModal({ local, imagem, visible, onClose, isFav, onFavorito }: {
   );
 }
 
-function LocalCard({ local, imagensLocais, isFav, onPress, onFavorito }: {
+function LocalCard({ local, isFav, onPress, onFavorito }: {
   local: Local;
-  imagensLocais: Record<string, any>;
   isFav: boolean;
   onPress: () => void;
   onFavorito: () => void;
 }) {
+  const [imgLoading, setImgLoading] = useState(true);
+  const rawUrl = local.imagemUrl || localImageMap[local.nome] || null;
+  const uri = rawUrl ? toUrl(rawUrl.split(',')[0].trim()) : null;
+
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.card}>
-        {imagensLocais[local.nome] ? (
-          <Image source={imagensLocais[local.nome]} style={styles.image} />
-        ) : local.imagemUrl ? (
-          <Image source={{ uri: toUrl(local.imagemUrl.split(',')[0].trim()) }} style={styles.image} />
-        ) : null}
+        <View style={styles.imageWrapper}>
+          {uri ? (
+            <Image
+              source={{ uri }}
+              style={styles.image}
+              onLoadStart={() => setImgLoading(true)}
+              onLoadEnd={() => setImgLoading(false)}
+            />
+          ) : null}
+          {(imgLoading || !uri) && (
+            <View style={styles.imagePlaceholder}>
+              <ActivityIndicator color="#FFC700" size="small" />
+            </View>
+          )}
+        </View>
         <TouchableOpacity style={styles.cardHeart} onPress={(e) => { e.stopPropagation?.(); onFavorito(); }}>
           <Ionicons
             name={isFav ? 'heart' : 'heart-outline'}
@@ -129,7 +159,7 @@ function LocalCard({ local, imagensLocais, isFav, onPress, onFavorito }: {
   );
 }
 
-export default function LocalList({ sigla, imagensLocais = {} }: Props) {
+export default function LocalList({ sigla }: Props) {
   const t = comida;
   const { open } = useLocalSearchParams<{ open?: string }>();
   const [locais, setLocais] = useState<Local[]>([]);
@@ -140,10 +170,14 @@ export default function LocalList({ sigla, imagensLocais = {} }: Props) {
   useEffect(() => {
     Promise.all([getLocaisPorEstado(sigla), getFavoritos()])
       .then(([ls, favs]) => {
-        setLocais(ls);
+        // Mescla: banco tem prioridade; estáticos aparecem apenas se nome não existir no banco
+        const bancNomes = new Set(ls.map(l => l.nome.toLowerCase()));
+        const estaticos = getStaticLocais(sigla).filter(l => !bancNomes.has(l.nome.toLowerCase()));
+        const merged = [...ls, ...estaticos];
+        setLocais(merged);
         setFavoritos(favs);
         if (open) {
-          const match = ls.find(l => l.nome.toLowerCase() === decodeURIComponent(open).toLowerCase());
+          const match = merged.find(l => l.nome.toLowerCase() === decodeURIComponent(open).toLowerCase());
           if (match) setSelected(match);
         }
       })
@@ -170,7 +204,6 @@ export default function LocalList({ sigla, imagensLocais = {} }: Props) {
         <LocalCard
           key={local.id}
           local={local}
-          imagensLocais={imagensLocais}
           isFav={favoritos.includes(local.id)}
           onPress={() => setSelected(local)}
           onFavorito={() => handleFavorito(local)}
@@ -179,7 +212,6 @@ export default function LocalList({ sigla, imagensLocais = {} }: Props) {
 
       <LocalModal
         local={selected}
-        imagem={selected ? imagensLocais[selected.nome] : undefined}
         visible={!!selected}
         onClose={() => setSelected(null)}
         isFav={selected ? favoritos.includes(selected.id) : false}
@@ -191,15 +223,17 @@ export default function LocalList({ sigla, imagensLocais = {} }: Props) {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: '#2A3F5F', borderRadius: 15, marginBottom: 20, elevation: 3 },
+  imageWrapper: { width: '100%', height: 150, borderTopLeftRadius: 15, borderTopRightRadius: 15, overflow: 'hidden', backgroundColor: '#1a2e47' },
   image: { width: '100%', height: 150, borderTopLeftRadius: 15, borderTopRightRadius: 15 },
+  imagePlaceholder: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a2e47' },
   content: { padding: 15 },
   cardHeart: { position: 'absolute', top: 10, right: 10, zIndex: 1, backgroundColor: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: 5 },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#009688', marginBottom: 2 },
+  title: { fontSize: 18, fontWeight: 'bold', color: '#FFC700', marginBottom: 2 },
   sub: { fontSize: 14, color: '#aaa', marginVertical: 5 },
   desc: { fontSize: 14, color: '#ccc' },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1E2F4A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+  modalCard: { backgroundColor: '#1E2F4A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '95%', flex: 1 },
   modalImage: { width: W, height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   modalClose: {
     position: 'absolute', top: 14, right: 14,
@@ -219,6 +253,13 @@ const styles = StyleSheet.create({
   modalRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
   modalMeta: { fontSize: 13, color: '#ccc', flex: 1 },
   modalDesc: { fontSize: 15, color: '#ddd', lineHeight: 23, marginTop: 12, marginBottom: 10 },
+  secao: { marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
+  secaoTitulo: { fontSize: 17, fontWeight: 'bold', color: '#FFC700', marginBottom: 8 },
+  secaoTexto: { fontSize: 14, color: '#ccc', lineHeight: 22, marginBottom: 8 },
+  secaoItem: { fontSize: 13, color: '#aaa', lineHeight: 20, marginBottom: 4, paddingLeft: 4 },
+  subsecao: { marginTop: 12 },
+  subsecaoTitulo: { fontSize: 14, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  subsecaoTexto: { fontSize: 13, color: '#bbb', lineHeight: 20 },
   modalBtn: {
     backgroundColor: '#FFC700', margin: 20, marginTop: 0,
     borderRadius: 25, paddingVertical: 13, alignItems: 'center',

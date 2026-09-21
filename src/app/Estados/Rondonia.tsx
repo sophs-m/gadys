@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/ro.png');
-const estradaDeFerroMadeiraMamoreImage = require('../../../assets/images/ro/estrada-de-ferro.png');
-const festivalDeGuajaraMirimImage = require('../../../assets/images/ro/festival.png');
-const fortePrincipeDaBeiraImage = require('../../../assets/images/ro/forte.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Festival Folclórico de Guajará-Mirim',
-        category: 'Evento',
-        location: 'Guajará-Mirim',
-        description: 'A disputa entre os bois-bumbás Malhadinho e Flor do Campo, uma festa de cores, ritmos e tradições.',
-        modalDescription: `**Festival Folclórico de Guajará-Mirim**\n\n**Tradição, Identidade e Cultura Amazônica**\nO Festival Folclórico de Guajará-Mirim, em Rondônia, é uma das principais manifestações culturais da região amazônica de fronteira. Ele surgiu como forma de valorização das tradições locais, reunindo danças, músicas, lendas e expressões populares que refletem a mistura entre influências indígenas, migrantes brasileiros e culturas bolivianas próximas.\n\nO festival tem forte caráter comunitário e ajuda a preservar a memória cultural da região do rio Mamoré, sendo também um espaço de resistência cultural em uma área historicamente marcada pela ocupação recente e pela diversidade de povos.`,
-        image: festivalDeGuajaraMirimImage,
-        rating: 5
-    },
-    {
-        name: 'Estrada de Ferro Madeira-Mamoré',
-        category: 'Monumento',
-        location: 'Porto Velho',
-        description: 'A “Ferrovia do Diabo”, que custou a vida de milhares de trabalhadores, hoje um símbolo da saga da borracha.',
-        modalDescription: `**Estrada de Ferro Madeira-Mamoré**\n\n**Integração, Borracha e História da Amazônia**\nA Estrada de Ferro Madeira-Mamoré foi construída no início do século XX em Rondônia, durante o ciclo da borracha. Seu objetivo era facilitar o escoamento da produção de látex, contornando as dificuldades de navegação nos rios Madeira e Mamoré.\n\nA obra foi extremamente difícil, marcada por doenças tropicais, condições precárias de trabalho e grande número de trabalhadores vindos de várias partes do mundo. Apesar disso, a ferrovia se tornou um marco da tentativa de integração da Amazônia ao restante do Brasil e simboliza um dos grandes projetos de infraestrutura do período.`,
-        image: estradaDeFerroMadeiraMamoreImage,
-        rating: 5
-    },
-    {
-        name: 'Real Forte Príncipe da Beira',
-        category: 'Monumento',
-        location: 'Costa Marques',
-        description: 'A maior edificação militar portuguesa construída no Brasil, um marco da disputa pela posse da Amazônia.',
-        modalDescription: `**Real Forte Príncipe da Beira**\n\n**Defesa da Fronteira e Ocupação Colonial**\nO Real Forte Príncipe da Beira, localizado às margens do rio Guaporé em Rondônia, foi construído no século XVIII durante o período colonial português. Sua função principal era garantir a defesa da fronteira oeste do Brasil e consolidar a presença portuguesa na região amazônica.\n\nA fortaleza representa a estratégia militar de ocupação do interior do continente, em uma área de intensa disputa entre Portugal e Espanha. Hoje, é um dos mais importantes patrimônios históricos da Amazônia brasileira.`,
-        image: fortePrincipeDaBeiraImage,
-        rating: 4
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Rondonia() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,15 +41,10 @@ export default function Rondonia() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="RO" imagensLocais={{
-              'Ferrovia Madeira-Mamoré': estradaDeFerroMadeiraMamoreImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="RO" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

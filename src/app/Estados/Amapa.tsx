@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/ap.png');
-const marcoZeroImage = require('../../../assets/images/ap/marco-zero.png');
-const fortalezaImage = require('../../../assets/images/ap/fortaleza.png');
-const marabaixoImage = require('../../../assets/images/ap/marabaixo.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    { 
-        name: 'Marabaixo', 
-        category: 'Evento', 
-        location: 'Amapá', 
-        description: 'Expressão cultural afro-amapaense que mistura dança, música e religiosidade, celebrada principalmente na Páscoa.', 
-        modalDescription: `**Marabaixo**\n\n**Origem e Resistência Cultural**\nO Marabaixo é uma das mais importantes manifestações culturais do Amapá, com raízes nas tradições afro-brasileiras trazidas pelos descendentes de africanos escravizados que viveram na região. Surgido entre os séculos XVIII e XIX, o Marabaixo combina dança, música, religiosidade e celebração comunitária, sendo tradicionalmente realizado durante festividades ligadas ao Divino Espírito Santo e à Santíssima Trindade.\n\n**Influência na Identidade Amapaense**\nMais do que uma expressão artística, o Marabaixo representa a resistência cultural e a preservação da memória das comunidades negras do Amapá. Seus tambores, cantos e danças ajudam a transmitir conhecimentos e tradições entre gerações, tornando-se um dos principais símbolos da identidade cultural amapaense.`,
-        image: marabaixoImage, 
-        rating: 4 
-    },
-    { 
-        name: 'Marco Zero', 
-        category: 'Monumento', 
-        location: 'Macapá', 
-        description: 'Monumento que marca a passagem da linha do Equador, onde é possível estar nos dois hemisférios ao mesmo tempo.', 
-        modalDescription: `**Marco Zero**\n\n**O Encontro com a Linha do Equador**\nLocalizado em Macapá, o Marco Zero é um monumento construído para marcar a passagem da Linha do Equador pelo estado do Amapá. Inaugurado no final do século XX, o local permite que visitantes observem e atravessem simbolicamente a divisão entre os hemisférios Norte e Sul.\n\n**Importância Turística e Científica**\nO monumento tornou-se um dos principais cartões-postais do estado e um símbolo da posição geográfica privilegiada do Amapá. Além de atrair turistas, o espaço promove atividades educativas relacionadas à astronomia, geografia e à importância da Linha do Equador para os estudos científicos.`,
-        image: marcoZeroImage, 
-        rating: 5 
-    },
-    { 
-        name: 'Fortaleza de São José de Macapá', 
-        category: 'Monumento', 
-        location: 'Macapá', 
-        description: 'Uma das maiores fortalezas do Brasil Colônia, construída para defender a Amazônia de invasões estrangeiras.',
-        modalDescription: `**Fortaleza de São José de Macapá**\n\n**Defesa da Amazônia Portuguesa**\nConstruída entre 1764 e 1782 por ordem da Coroa Portuguesa, a Fortaleza de São José de Macapá foi erguida para proteger a região amazônica contra possíveis invasões estrangeiras e garantir o domínio português sobre o extremo norte do território brasileiro. Sua construção envolveu trabalhadores indígenas, africanos escravizados e colonos portugueses.\n\n**Patrimônio Histórico Nacional**\nConsiderada uma das maiores fortificações militares coloniais do Brasil, a fortaleza é um importante marco da ocupação portuguesa na Amazônia. Atualmente, é reconhecida como patrimônio histórico e cultural, preservando parte significativa da história da formação territorial do país e da cidade de Macapá.`,
-        image: fortalezaImage, 
-        rating: 5 
-    },
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Amapa() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,17 +41,10 @@ export default function Amapa() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="AP" imagensLocais={{
-              'Marco Zero': marcoZeroImage,
-              'Fortaleza de São José de Macapá': fortalezaImage,
-              'Marabaixo': marabaixoImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="AP" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/pa.png');
-const veropesoImage = require('../../../assets/images/pa/ver-o-peso.png');
-const cirioImage = require('../../../assets/images/pa/cirio.png');
-const marajoImage = require('../../../assets/images/pa/marajo.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Círio de Nazaré',
-        category: 'Evento',
-        location: 'Belém',
-        description: 'A maior festa religiosa do Brasil, uma procissão que reúne milhões de fiéis em devoção a Nossa Senhora de Nazaré.',
-        modalDescription: `**Círio de Nazaré**\n\n**Fé, História e Identidade Amazônica**\nO Círio de Nazaré é uma das maiores manifestações religiosas do Brasil e ocorre anualmente em Belém, no estado do Pará. Sua origem remonta ao século XVIII, quando a imagem de Nossa Senhora de Nazaré foi encontrada por um caboclo às margens do igarapé Murucutu. A partir desse episódio, começou a devoção que daria origem à procissão.\n\nCom o tempo, o evento cresceu e passou a reunir milhões de fiéis, tornando-se uma das maiores romarias católicas do mundo. O Círio também reflete a mistura entre religiosidade, cultura amazônica e tradição popular, envolvendo promessas, procissões fluviais e manifestações culturais que vão além do aspecto religioso.`,
-        image: cirioImage,
-        rating: 5
-    },
-    {
-        name: 'Mercado Ver-o-Peso',
-        category: 'Monumento',
-        location: 'Belém',
-        description: 'Um dos mercados mais antigos do Brasil, com uma explosão de cores, cheiros e sabores amazônicos.',
-        modalDescription: `**Mercado Ver-o-Peso**\n\n**Comércio, Cultura e História de Belém**\nO Mercado Ver-o-Peso, localizado em Belém do Pará, surgiu no período colonial como ponto de controle da entrada e saída de mercadorias na Amazônia. Seu nome vem da antiga função de fiscalizar o peso e a taxação dos produtos que chegavam à cidade.\n\nCom o tempo, o mercado se tornou um dos maiores centros de comércio popular da região Norte, reunindo produtos da floresta, ervas medicinais, peixes, frutas e alimentos típicos da Amazônia.\n\nMais do que um espaço econômico, o Ver-o-Peso é também um símbolo cultural, refletindo a diversidade e a identidade amazônica construída ao longo dos séculos.`,
-        image: veropesoImage,
-        rating: 5
-    },
-    {
-        name: 'Ilha de Marajó',
-        category: 'Outro',
-        location: 'Marajó',
-        description: 'A maior ilha fluviomarinha do mundo, com búfalos, praias selvagens e uma cultura única.',
-        modalDescription: `**Ilha de Marajó**\n\n**Cultura Ribeirinha e Biodiversidade Amazônica**\nA Ilha de Marajó, localizada na foz do rio Amazonas, é a maior ilha fluviomarinha do mundo e possui uma história marcada pela presença de antigas civilizações indígenas marajoaras, conhecidas por sua cerâmica sofisticada e organização social complexa.\n\nDurante o período colonial, a região foi ocupada de forma esparsa devido às condições naturais, mas manteve forte presença de comunidades ribeirinhas que vivem em harmonia com os ciclos das águas.\n\nA cultura marajoara é uma das mais importantes da Amazônia, influenciando a arte, o artesanato e a identidade regional. Hoje, a ilha também se destaca pela pecuária bubalina, pelo turismo ecológico e pela preservação de ecossistemas únicos.`,
-        image: marajoImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Para() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,17 +41,10 @@ export default function Para() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="PA" imagensLocais={{
-              'Alter do Chão': veropesoImage,
-              'Mercado Ver-o-Peso': veropesoImage,
-              'Ilha de Marajó': marajoImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="PA" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

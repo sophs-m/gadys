@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/go.png');
-const chapadaImage = require('../../../assets/images/go/chapada.png');
-const cidadeImage = require('../../../assets/images/go/cidade.png');
-const musicaImage = require('../../../assets/images/go/musica.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Chapada dos Veadeiros',
-        category: 'Outro',
-        location: 'Alto Paraíso de Goiás',
-        description: 'Um santuário ecológico com cânions, cachoeiras e uma energia mística que atrai visitantes do mundo todo.',
-        modalDescription: `**Chapada dos Veadeiros**\n\n**Um Patrimônio Natural do Cerrado Brasileiro**\nLocalizada no nordeste de Goiás, a Chapada dos Veadeiros possui uma história que vai muito além do turismo. A região é habitada há milhares de anos por povos indígenas que utilizavam seus rios, montanhas e recursos naturais para sobrevivência. Durante o ciclo do ouro, no século XVIII, bandeirantes e garimpeiros passaram a explorar a área.\n\nA Chapada está situada sobre uma das formações geológicas mais antigas do planeta, com rochas que possuem mais de um bilhão de anos. Em 1961 foi criado o Parque Nacional da Chapada dos Veadeiros, com o objetivo de proteger os ecossistemas da região. Décadas depois, a área recebeu o título de Patrimônio Natural Mundial da UNESCO.`,
-        image: chapadaImage,
-        rating: 5
-    },
-    {
-        name: 'Cidade de Goiás',
-        category: 'Monumento',
-        location: 'Goiás',
-        description: 'A antiga capital do estado, um tesouro colonial com suas ruas de pedra, casarões e igrejas barrocas.',
-        modalDescription: `**Cidade de Goiás**\n\n**A Primeira Capital e Berço da História Goiana**\nFundada em 1727 por Bartolomeu Bueno da Silva, a Cidade de Goiás, também conhecida como Goiás Velho, surgiu durante o ciclo da mineração do ouro no Brasil Colonial. Inicialmente chamada de Vila Boa de Goiás, tornou-se o principal centro administrativo, econômico e político da região.\n\nDurante o século XVIII, a cidade viveu um período de prosperidade impulsionado pela mineração. Igrejas barrocas, casarões coloniais e prédios administrativos foram construídos. Em 1937, a capital foi transferida para Goiânia, mas a antiga Vila Boa continuou desempenhando papel fundamental na preservação da história goiana.\n\nEm 2001, seu conjunto arquitetônico foi reconhecido como Patrimônio Mundial pela UNESCO. Além de sua relevância histórica, a cidade é conhecida por ter sido o local de nascimento da poetisa Cora Coralina.`,
-        image: cidadeImage,
-        rating: 5
-    },
-    {
-        name: 'Música Sertaneja',
-        category: 'Evento',
-        location: 'Goiânia',
-        description: 'Goiás é o berço da música sertaneja, um ritmo que conquistou o Brasil e que tem em Goiânia sua principal capital.',
-        modalDescription: `**Seresta Goiana**\n\n**Uma Tradição Musical que Preserva a Memória do Estado**\nA seresta é uma das manifestações culturais mais tradicionais de Goiás, especialmente na histórica Cidade de Goiás. Sua origem remonta aos séculos XIX e XX, quando grupos de músicos percorriam as ruas durante a noite cantando modinhas, valsas e canções românticas. Inspirada nas serenatas portuguesas, a prática foi incorporada à cultura goiana e tornou-se uma importante forma de convivência social.\n\nCom o passar das décadas, a seresta transformou-se em um símbolo da preservação das tradições locais. Músicos e moradores percorrem as ruas históricas da antiga capital cantando canções que retratam a história, os costumes e a identidade do povo goiano.`,
-        image: musicaImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Goias() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,13 +41,10 @@ export default function Goias() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="GO" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="GO" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

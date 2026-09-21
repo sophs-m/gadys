@@ -1,145 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/to.png');
-const jalapaoImage = require('../../../assets/images/to/jalapao.png');
-const capimDouradoImage = require('../../../assets/images/to/artesanato.png');
-const congadasImage = require('../../../assets/images/to/congadas.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Congada no Tocantins',
-        category: 'Evento',
-        location: 'Taguatinga',
-        description: 'É uma manifestação cultural e religiosa afro-brasileira que combina dança, música, teatro e espiritualidade, celebrando santos católicos e ancestrais africanos.',
-        modalDescription: `**Congada no Tocantins**\n\n**Fé, Herança Afro-brasileira e Cultura Popular**\nA Congada no Tocantins é uma manifestação cultural e religiosa que tem origem nas tradições afro-brasileiras trazidas durante o período colonial, especialmente ligadas às irmandades do Rosário. Ela chegou ao território tocantinense a partir da migração de populações do Centro-Oeste e Nordeste, sendo adaptada às comunidades locais ao longo do tempo.\n\nHistoricamente, a congada representa uma forma de resistência cultural das populações negras escravizadas e libertas, misturando elementos do catolicismo com ritmos, danças e narrativas de origem africana. No Tocantins, ela se mantém viva em festas populares, reforçando a identidade comunitária e a preservação da memória afro-brasileira no Cerrado.`,
-        image: congadasImage,
-        rating: 5
-    },
-    {
-        name: 'Jalapão',
-        category: 'Outro',
-        location: 'Mateiros',
-        description: 'Um oásis no coração do Brasil, com dunas, cachoeiras, fervedouros e uma natureza exuberante.',
-        modalDescription: `**Jalapão**\n\n**Paisagem do Cerrado e História de Isolamento e Transformação**\nO Jalapão, localizado no leste do Tocantins, é uma região marcada por dunas douradas, fervedouros, rios e chapadas do Cerrado. Durante grande parte de sua história, o território permaneceu isolado, com ocupação esparsa de comunidades tradicionais que viviam da agricultura de subsistência, extrativismo e criação de animais.\n\nA partir do final do século XX, o Jalapão passou a ganhar destaque com o desenvolvimento do ecoturismo, revelando suas paisagens únicas e ecossistemas preservados. Essa transformação trouxe maior visibilidade à região e reforçou a importância da conservação ambiental.\n\nHoje, o Jalapão é um dos principais símbolos naturais do Tocantins, unindo biodiversidade, cultura local e turismo sustentável.`,
-        image: jalapaoImage,
-        rating: 5
-    },
-    {
-        name: 'Artesanato de Capim Dourado',
-        category: 'Outro',
-        location: 'Ponte Alta do Tocantins',
-        description: 'O “ouro do Jalapão”, uma fibra vegetal que se transforma em biojoias e objetos de decoração.',
-        modalDescription: `**Artesanato de Capim Dourado**\n\n**O Ouro do Jalapão**\nO artesanato de capim dourado é a mais importante manifestação cultural do Jalapão. A técnica, herdada dos índios Xerente, consiste em costurar as hastes do capim dourado, uma planta que só nasce na região, com fios de seda de buriti. O resultado são peças de uma beleza única, que brilham como ouro.\n\nO artesanato de capim dourado é a principal fonte de renda de muitas comunidades do Jalapão. A colheita do capim é feita de forma sustentável, garantindo a preservação da espécie e a continuidade da tradição. As biojoias e os objetos de decoração de capim dourado são vendidos em todo o Brasil e no exterior, levando a cultura e a beleza do Jalapão para o mundo.`,
-        image: capimDouradoImage,
-        rating: 5
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Tocantins() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -165,15 +41,10 @@ export default function Tocantins() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="TO" imagensLocais={{
-              'Jalapão': jalapaoImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="TO" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

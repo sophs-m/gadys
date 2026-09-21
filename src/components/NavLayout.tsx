@@ -6,6 +6,7 @@ import {
   Image, Modal, StyleSheet, Text,
   TouchableOpacity, TouchableWithoutFeedback, View
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { comida, themes, useSettings } from '../context/SettingsContext';
 
 type NavPage = 'inicio' | 'estados' | 'favoritos' | 'perfil';
@@ -22,6 +23,8 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
   const { theme } = useSettings();
   const t = comida;
   const c = themes[theme];
+  const insets = useSafeAreaInsets();
+  const navHeight = 60 + insets.bottom;
   const [nomeUsuario, setNomeUsuario] = useState('');
   const [userImage, setUserImage] = useState<string | null>(null);
 
@@ -44,7 +47,7 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
       {children}
 
       {/* BOTTOM NAV */}
-      <View style={[styles.bottomNav, { backgroundColor: c.nav }]}>
+      <View style={[styles.bottomNav, { backgroundColor: c.nav, height: navHeight, paddingBottom: insets.bottom }]}>
         {navItems.map((item, i) => {
           const isActive = active === item.key;
           if (i === 1) {
@@ -70,7 +73,7 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
       {/* CHAT CENTRAL */}
       <TouchableOpacity
         accessibilityLabel="Abrir chat"
-        style={[styles.navChatContainer, { backgroundColor: c.accent }]}
+        style={[styles.navChatContainer, { backgroundColor: c.accent, bottom: insets.bottom + 20 }]}
         onPress={() => router.push('/chat')}
       >
         <Ionicons name="chatbubbles" size={27} color={theme === 'light' ? '#fff' : '#0A172A'} />
@@ -117,13 +120,13 @@ export default function NavLayout({ active, menuVisible, onMenuClose, children }
 
 const styles = StyleSheet.create({
   bottomNav: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, height: 70,
-    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingTop: 10,
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-start', paddingTop: 10,
   },
   navItem: { alignItems: 'center', width: 60 },
   navText: { fontSize: 12, marginTop: 4 },
   navChatContainer: {
-    position: 'absolute', left: '50%', bottom: 20, marginLeft: -35,
+    position: 'absolute', left: '50%', marginLeft: -35,
     width: 70, height: 70, borderRadius: 35, justifyContent: 'center', alignItems: 'center', elevation: 10,
   },
   navChatText: { fontSize: 11, fontWeight: '700', marginTop: 1 },

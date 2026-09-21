@@ -1,155 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/ce.png');
-const canoaQuebradaImage = require('../../../assets/images/ce/canoa.png');
-const jericoacoaraImage = require('../../../assets/images/ce/jericoacoara.png');
-const forroImage = require('../../../assets/images/ce/forro.png');
-const estatuaImage = require('../../../assets/images/ce/centro.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-    {
-        name: 'Forró',
-        category: 'Evento',
-        location: 'Ceará',
-        description: 'Ritmo musical e dança que embala as noites cearenses, com suas sanfonas, zabumbas e triângulos.',
-        modalDescription: `**Forró**\n\n**Origem e Formação de um Símbolo Nordestino**\nO forró é uma das manifestações culturais mais importantes do Nordeste brasileiro e possui origens ligadas às tradições populares do sertão. Sua formação resultou da mistura de influências indígenas, africanas e europeias. O gênero ganhou projeção nacional a partir das décadas de 1940 e 1950 graças ao trabalho de Luiz Gonzaga, que levou a música nordestina para todo o país.\n\nTradicionalmente executado com sanfona, zabumba e triângulo, o forró tornou-se uma importante forma de expressão das vivências do povo nordestino, retratando temas como a seca, a migração, o trabalho no campo e o cotidiano sertanejo. Além de gênero musical, o forró representa um patrimônio cultural que fortalece a identidade regional e mantém vivas tradições transmitidas entre gerações.`,
-        image: forroImage,
-        rating: 5
-    },
-    {
-        name: 'Canoa Quebrada',
-        category: 'Monumento',
-        location: 'Aracati',
-        description: 'Praia famosa por suas falésias avermelhadas, dunas e pelo símbolo da lua e da estrela.',
-        modalDescription: `**Canoa Quebrada**\n\n**Da Vila de Pescadores ao Destino Turístico Internacional**\nLocalizada no município de Aracati, Canoa Quebrada surgiu como uma pequena comunidade de pescadores que viveu por séculos de forma relativamente isolada. A região começou a ganhar notoriedade na década de 1970, quando viajantes e grupos ligados ao movimento hippie descobriram suas paisagens de falésias avermelhadas, praias extensas e clima tranquilo.\n\nA partir desse período, Canoa Quebrada passou por um processo de desenvolvimento turístico que transformou a economia local. Mesmo com o crescimento da infraestrutura voltada para visitantes, a vila preservou elementos de sua cultura tradicional, especialmente a pesca artesanal.\n\nHoje, o símbolo da lua e estrela esculpido nas falésias tornou-se uma das imagens mais conhecidas do turismo cearense, representando a liberdade, a diversidade cultural e a beleza natural da região.`,
-        image: canoaQuebradaImage,
-        rating: 5
-    },
-    {
-        name: 'Jericoacoara',
-        category: 'Monumento',
-        location: 'Jijoca de Jericoacoara',
-        description: 'Vila de pescadores com ruas de areia, praias paradisíacas e a famosa Pedra Furada.',
-        modalDescription: `**Jericoacoara**\n\n**De Comunidade Isolada a Referência Mundial em Turismo**\nJericoacoara, localizada no litoral oeste do Ceará, teve origem como uma pequena vila de pescadores cercada por dunas e áreas de vegetação costeira. Durante grande parte de sua história, o acesso ao local era extremamente difícil, o que contribuiu para a preservação de suas paisagens naturais.\n\nA partir das décadas de 1980 e 1990, a região passou a atrair visitantes brasileiros e estrangeiros interessados em suas praias, lagoas e formações naturais. O reconhecimento de sua importância ambiental levou à criação do Parque Nacional de Jericoacoara.\n\nAtualmente, Jericoacoara é considerada um dos destinos turísticos mais famosos do Brasil, demonstrando como a preservação ambiental e o turismo podem contribuir para o crescimento econômico sem apagar a história e as tradições locais.`,
-        image: jericoacoaraImage,
-        rating: 5
-    },
-    {
-        name: 'Centro Dragão do Mar de Arte e Cultura',
-        category: 'Monumento',
-        location: 'Fortaleza',
-        description: 'Centro cultural e de entretenimento em homenagem ao herói abolicionista Francisco José do Nascimento.',
-        modalDescription: `**Centro Dragão do Mar de Arte e Cultura**\n\n**Homenagem a um Líder Abolicionista**\nO Centro Dragão do Mar recebeu esse nome em homenagem a Francisco José do Nascimento, líder jangadeiro que teve papel importante no movimento abolicionista cearense. Em 1881, ele e outros trabalhadores do porto recusaram-se a transportar pessoas escravizadas para embarcações, tornando-se símbolo da luta pela liberdade.\n\nInaugurado em 1999, o complexo foi criado com o objetivo de promover a cultura, a educação e as artes no Ceará. O espaço reúne museus, cinemas, teatros, bibliotecas, planetário e áreas para exposições, tornando-se um dos maiores centros culturais do país.`,
-        image: estatuaImage,
-        rating: 4
-    }
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Ceara() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -175,18 +41,10 @@ export default function Ceara() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="CE" imagensLocais={{
-              'Jericoacoara': jericoacoaraImage,
-              'Canoa Quebrada': canoaQuebradaImage,
-              'Forró': forroImage,
-              'Centro Dragão do Mar de Arte e Cultura': estatuaImage,
-            }} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="CE" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }

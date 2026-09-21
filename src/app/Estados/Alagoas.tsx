@@ -1,156 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AbasSwipe from '../../components/AbasSwipe';
 import LocalList from '../../components/LocalList';
-import { getPontosFavoritos, togglePontoFavorito } from '../../services/pontosFavoritos';
 
 const headerImage = require('../../../assets/images/estados/al.png');
-const maragogiImage = require('../../../assets/images/al/maragogi.png');
-const fozDoSaoFranciscoImage = require('../../../assets/images/al/foz-sao-francisco.png');
-const artesanatoImage = require('../../../assets/images/al/artesanato.png');
-
-const bomJesusImage = require('../../../assets/images/al/bom-jesus.png');
-
-interface Place {
-  name: string;
-  category: 'Monumento' | 'Evento' | 'Comida Típica' | 'Outro';
-  location: string;
-  description: string;
-  modalDescription?: string;
-  image: any;
-  rating: number;
-}
-
-const places: Place[] = [
-  {
-    name: 'Festa de Bom Jesus dos Navegantes',
-    category: 'Evento',
-    location: 'Salvador',
-    description: 'Uma das maiores festas religiosas do estado, com uma procissão de barcos no Rio São Francisco.',
-    modalDescription: `**Festa de Bom Jesus dos Navegantes**\n\n**Origem e Tradição Religiosa**\nA devoção a Bom Jesus dos Navegantes chegou ao litoral alagoano durante o período colonial, trazida pelos portugueses. A celebração surgiu da forte relação das comunidades costeiras e ribeirinhas com a navegação e a pesca, atividades essenciais para a sobrevivência da população local. Ao longo dos séculos, a festa consolidou-se como uma das mais importantes manifestações religiosas de Alagoas, reunindo procissões terrestres e fluviais, missas e celebrações populares.\n\n**Influência Cultural**\nAlém de expressar a fé da população, a festa fortalece os laços comunitários e preserva tradições que fazem parte da identidade alagoana. O evento também movimenta o turismo religioso e contribui para a valorização do patrimônio cultural do estado.`,
-    image: bomJesusImage,
-    rating: 4,
-  },
-  {
-    name: 'Maragogi',
-    category: 'Monumento',
-    location: 'Maragogi',
-    description: 'Conhecida como o Caribe Brasileiro, com piscinas naturais de águas cristalinas.',
-    modalDescription: `**Maragogi**\n\n**Da Vila de Pescadores ao Polo Turístico**\nMaragogi teve origem como uma pequena comunidade dedicada à pesca e à agricultura. Com o passar do tempo, suas características naturais excepcionais passaram a atrair visitantes, especialmente devido às piscinas naturais formadas pelos recifes de corais. O município tornou-se um dos principais destinos turísticos do Nordeste e um dos cartões-postais de Alagoas.\n\n**Influência Econômica e Ambiental**\nO crescimento do turismo transformou a economia local, gerando empregos e impulsionando setores como hotelaria, gastronomia e transporte. Ao mesmo tempo, Maragogi tornou-se referência na preservação dos ecossistemas costeiros, destacando a importância da conservação ambiental para o desenvolvimento sustentável.`,
-    image: maragogiImage,
-    rating: 5,
-  },
-  {
-    name: 'Foz do Rio São Francisco',
-    category: 'Outro',
-    location: 'Piaçabuçu',
-    description: 'Um cenário deslumbrante onde o Velho Chico encontra o mar.',
-    modalDescription: `**Foz do Rio São Francisco**\n\n**Um Marco Natural e Histórico**\nA Foz do Rio São Francisco representa o encontro entre o "Velho Chico" e o Oceano Atlântico, na divisa entre Alagoas e Sergipe. Desde os primeiros séculos da colonização, o rio desempenhou papel fundamental no transporte de pessoas, mercadorias e informações pelo interior do Brasil, sendo considerado um dos principais eixos de integração nacional.\n\n**Influência para a Região**\nAs comunidades estabelecidas ao longo do rio desenvolveram modos de vida fortemente ligados à pesca, à agricultura e à navegação. Atualmente, a Foz do São Francisco é um importante destino turístico e símbolo da riqueza natural brasileira, além de representar a importância histórica do rio para o desenvolvimento econômico e cultural do país.`,
-    image: fozDoSaoFranciscoImage,
-    rating: 5,
-  },
-  {
-    name: 'Artesanato em Filé',
-    category: 'Outro',
-    location: 'Alagoas',
-    description: 'Uma técnica de bordado única, que produz peças coloridas e delicadas.',
-    modalDescription: `**Artesanato em Filé**\n\n**Origem nas Comunidades Pesqueiras**\nO artesanato em filé surgiu nas comunidades litorâneas de Alagoas, inspirado nas redes utilizadas pelos pescadores. As artesãs passaram a utilizar uma malha semelhante à das redes para criar bordados decorativos com padrões geométricos coloridos, transformando uma técnica simples em uma expressão artística reconhecida nacionalmente.\n\n**Influência Cultural e Econômica**\nTransmitido de geração em geração, o filé tornou-se um dos maiores símbolos da cultura alagoana. Além de preservar saberes tradicionais, a atividade gera renda para inúmeras famílias e fortalece o artesanato local. Suas peças são comercializadas em todo o Brasil, contribuindo para a divulgação da identidade cultural de Alagoas e para a valorização do trabalho artesanal.`,
-    image: artesanatoImage,
-    rating: 4,
-  },
-];
-
-const PlaceCard = ({ place, onPress, isFav, onFavorito }: { place: Place; onPress: (place: Place) => void; isFav: boolean; onFavorito: (name: string) => void }) => (
-  <TouchableOpacity onPress={() => onPress(place)}>
-    <View style={styles.card}>
-      <Image source={place.image} style={styles.cardImage} />
-      <TouchableOpacity style={styles.cardHeart} onPress={() => onFavorito(place.name)}>
-        <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={22} color={isFav ? '#e53935' : '#aaa'} />
-      </TouchableOpacity>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{place.name}</Text>
-        <Text style={styles.cardCategory}>{place.category} • {place.location}</Text>
-        <Text style={styles.cardDescription}>{place.description}</Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const PlaceModal = ({ place, visible, onClose, isFav, onFavorito }: { place: Place | null; visible: boolean; onClose: () => void; isFav?: boolean; onFavorito?: (name: string) => void }) => {
-  if (!place) return null;
-
-  const renderDescription = (description: string) => {
-    const parts = (description || '').split('**');
-    return (
-      <Text style={styles.modalDescription}>
-        {parts.map((part, index) => {
-          if (index % 2 === 1) {
-            return <Text key={index} style={styles.modalSubtitle}>{part}</Text>;
-          }
-          return part;
-        })}
-      </Text>
-    );
-  };
-
-  return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Image source={place.image} style={styles.modalImage} />
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseBtnText}>✕</Text>
-          </TouchableOpacity>
-          <ScrollView style={styles.modalBody}>
-            <View style={styles.modalTitleRow}>
-              <Text style={styles.modalTitle}>{place.name}</Text>
-              <TouchableOpacity onPress={() => onFavorito && onFavorito(place.name)}>
-                <Ionicons name={isFav ? 'heart' : 'heart-outline'} size={26} color={isFav ? '#e53935' : '#aaa'} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalCategory}>{place.category} • {place.location}</Text>
-            {renderDescription(place.modalDescription || place.description)}
-          </ScrollView>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function Alagoas() {
   const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [pontosFavs, setPontosFavs] = useState<string[]>([]);
-
-  useEffect(() => { getPontosFavoritos().then(setPontosFavs); }, []);
-
-  const handlePontoFavorito = (nome: string) => {
-    togglePontoFavorito(nome).then(() => getPontosFavoritos().then(setPontosFavs));
-  };
-
-  const openModal = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    setModalVisible(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-    setSelectedPlace(null);
-  }, []);
-
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#0A172A' }}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Voltar</Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      
         <View style={styles.header}>
           <Image source={headerImage} style={styles.headerImage} />
         </View>
@@ -176,13 +41,10 @@ export default function Alagoas() {
           }
           culturaLocal={
             <View style={styles.content}>
-              <LocalList sigla="AL" imagensLocais={{}} />
-            {places.map(p => <PlaceCard key={p.name} place={p} onPress={openModal} isFav={pontosFavs.includes(p.name)} onFavorito={handlePontoFavorito} />)}
+              <LocalList sigla="AL" />
             </View>
           }
         />
-      </ScrollView>
-      <PlaceModal place={selectedPlace} visible={modalVisible} onClose={closeModal} isFav={selectedPlace ? pontosFavs.includes(selectedPlace.name) : false} onFavorito={handlePontoFavorito} />
     </View>
   );
 }
