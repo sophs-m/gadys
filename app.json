@@ -16,7 +16,13 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+  "output": "static",
+  "name": "Gadys",
+  "shortName": "Gadys",
+  "backgroundColor": "#0A172A",
+  "themeColor": "#0A172A",
+  "display": "standalone",
+  "favicon": "./assets/images/logo.png"
     },
     "plugins": [
       "expo-router",
