@@ -1,0 +1,21 @@
+{
+    "name": "Gadys",
+    "short_name": "Gadys",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0A172A",
+    "theme_color": "#0A172A",
+    "icons": [
+      {
+        "src": "/assets/images/logo.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/assets/images/logo.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  
