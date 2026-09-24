@@ -1,12 +1,12 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from './storage';
 
 const api = axios.create({
   baseURL: 'https://gadys-backend.onrender.com',
 });
 
 api.interceptors.request.use(async (config) => {
-  const usuarioId = await SecureStore.getItemAsync('usuarioId');
+  const usuarioId = await storage.getItem('usuarioId');
   if (usuarioId) config.headers['usuarioId'] = usuarioId;
   return config;
 });
