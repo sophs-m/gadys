@@ -16,7 +16,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "name": "Gadys",
       "shortName": "Gadys",
       "backgroundColor": "#0A172A",
