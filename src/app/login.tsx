@@ -3,15 +3,21 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator, Alert, Image, ImageBackground, KeyboardAvoidingView, Linking, Modal,
-  Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
+  Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View,
 } from 'react-native';
 import { esqueciSenha, login, loginPeloSite, salvarSessaoDoSite, SITE_URL } from '../services/auth';
 
 const emailValido = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
+// Acima disso consideramos "tela de navegador/desktop": a imagem de fundo (pensada
+// para a proporção de um celular) deixa de ser usada para não esticar/distorcer.
+const MOBILE_BREAKPOINT = 700;
+
 export default function Login() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { width } = useWindowDimensions();
+  const isMobileScreen = width < MOBILE_BREAKPOINT;
   const tratandoRetorno = useRef(false);
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -100,12 +106,14 @@ export default function Login() {
 
   return (
     <ImageBackground
-      // amazonq-ignore-next-line
-      source={require('../../assets/images/fundos/inicializacao.png')}
-      style={styles.bg}
+      // Em telas de navegador/desktop (largura >= MOBILE_BREAKPOINT) não usamos a imagem:
+      // ela foi pensada para a proporção de um celular e ficaria esticada/distorcida
+      // ocupando a largura toda de uma janela grande.
+      source={isMobileScreen ? require('../../assets/images/fundos/inicializacao.png') : undefined}
+      style={[styles.bg, !isMobileScreen && styles.bgWeb]}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, !isMobileScreen && styles.overlayWeb]}>
 
         {/* Logo */}
         <View style={styles.logoArea}>
@@ -234,6 +242,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
+  bgWeb: { backgroundColor: '#0A172A' },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(7,23,47,0.35)',
@@ -242,12 +251,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  overlayWeb: { backgroundColor: 'transparent' },
   logoArea: { alignItems: 'center', marginBottom: 32 },
   logo: { width: 180, height: 90, marginBottom: 20 },
   welcome: { fontSize: 34, fontWeight: 'bold', color: '#FFF', marginBottom: 8, textAlign: 'center' },
   subtitle: { fontSize: 15, color: '#CCC', textAlign: 'center', lineHeight: 22 },
 
-  form: { width: '100%', gap: 12 },
+  form: { width: '100%', maxWidth: 420, gap: 12 },
   input: {
     backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 25,
